@@ -10,6 +10,7 @@ import ThoughtDetail from "./pages/ThoughtDetail";
 import TodoPage from "./pages/Todo";
 import TagsPage from "./pages/Tags";
 import SearchPage from "./pages/Search";
+import CalendarPage from "./pages/Calendar";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/thought/:id" element={<ThoughtDetail />} />
           <Route path="/todo" element={<TodoPage />} />
           <Route path="/tags" element={<TagsPage />} />

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
   { to: "/", label: "Today" },
+  { to: "/calendar", label: "日曆" },
   { to: "/todo", label: "To-do" },
   { to: "/tags", label: "Tags" },
   { to: "/search", label: "搜尋" }

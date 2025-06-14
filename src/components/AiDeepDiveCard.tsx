@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { useAiDeepDive } from "@/hooks/useAiDeepDive";
 import { Textarea } from "@/components/ui/textarea";
@@ -121,8 +120,6 @@ export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
             <Textarea
               ref={inputRef}
               value={input}
-              minRows={2}
-              maxRows={4}
               onChange={e => setInput(e.target.value)}
               className="resize-none"
               placeholder="回應AI的提問，或輸入自我探索的想法…"

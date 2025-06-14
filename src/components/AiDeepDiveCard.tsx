@@ -65,14 +65,14 @@ export function AiDeepDiveCard({
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow flex flex-col gap-3">
       <div className="font-bold text-base mb-2 flex items-center gap-2">
-        🧠 脈德小腦瓜・智慧探索
+        腦瓜小世界
         <div className="ml-auto flex gap-2">
           <button
             className="text-xs underline text-muted-foreground"
             onClick={() => setShowMindMap(!showMindMap)}
-            title="顯示/隱藏思考脈絡圖"
+            title="顯示/隱藏思考流程圖"
           >
-            {showMindMap ? '隱藏' : '顯示'}脈絡圖
+            {showMindMap ? '隱藏' : '顯示'}流程圖
           </button>
           <button
             className="text-xs underline text-muted-foreground"
@@ -86,7 +86,7 @@ export function AiDeepDiveCard({
         </div>
       </div>
 
-      {/* 思考脈絡圖 */}
+      {/* 思考流程圖 */}
       {showMindMap && messages.length > 2 && (
         <div className="mb-4">
           <MindMapVisualization messages={messages} thoughtContent={thoughtContent} />

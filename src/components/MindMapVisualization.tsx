@@ -45,87 +45,88 @@ export function MindMapVisualization({ messages, thoughtContent }: MindMapVisual
     
     // 設置canvas尺寸
     canvas.width = 800;
-    canvas.height = 600;
+    canvas.height = 400; // Initial height
     
     // 清除畫布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 生成心智圖節點 - 更智能的主題歸納
+    // 生成樹狀圖節點
     const nodes: MindMapNode[] = [];
+    const canvasWidth = canvas.width;
+    const yStep = 90; // Vertical distance between levels
     
-    // 根節點（原始思緒）
+    // 根節點
     nodes.push({
       id: 'root',
-      text: extractKeywords(thoughtContent),
-      x: canvas.width / 2,
-      y: canvas.height / 2,
+      text: `核心: ${extractKeywords(thoughtContent)}`,
+      x: canvasWidth / 2,
+      y: 50,
       level: 0,
       type: 'root'
     });
     
-    // 處理對話訊息，按對話回合分組
+    // 處理對話訊息
     const userMessages = messages.filter(msg => msg.role === 'user' && msg.content !== thoughtContent);
     const assistantMessages = messages.filter(msg => msg.role === 'assistant');
-    
-    // 生成對話主題節點
     const conversationRounds = Math.min(userMessages.length, assistantMessages.length);
     
-    for (let i = 0; i < conversationRounds; i++) {
-      const userMsg = userMessages[i];
-      const aiMsg = assistantMessages[i];
-      
-      if (!userMsg || !aiMsg) continue;
-      
-      // 計算節點位置 - 使用更自然的分佈
-      const angle = (i * 2 * Math.PI) / Math.max(conversationRounds, 1);
-      const topicRadius = 120;
-      const insightRadius = 190;
-      
-      const topicX = canvas.width / 2 + Math.cos(angle) * topicRadius;
-      const topicY = canvas.height / 2 + Math.sin(angle) * topicRadius;
-      
-      // 用戶思考節點（話題）
-      nodes.push({
-        id: `topic-${i}`,
-        text: extractKeywords(userMsg.content),
-        x: topicX,
-        y: topicY,
-        level: 1,
-        parentId: 'root',
-        type: 'topic'
-      });
-      
-      // AI洞察節點
-      const insightAngle = angle + 0.2; // 稍微偏移
-      const insightX = canvas.width / 2 + Math.cos(insightAngle) * insightRadius;
-      const insightY = canvas.height / 2 + Math.sin(insightAngle) * insightRadius;
-      
-      nodes.push({
-        id: `insight-${i}`,
-        text: extractKeywords(aiMsg.content),
-        x: insightX,
-        y: insightY,
-        level: 2,
-        parentId: `topic-${i}`,
-        type: 'insight'
-      });
+    if (conversationRounds > 0) {
+      const topicWidth = canvasWidth / conversationRounds;
+
+      for (let i = 0; i < conversationRounds; i++) {
+        const userMsg = userMessages[i];
+        const aiMsg = assistantMessages[i];
+        
+        if (!userMsg || !aiMsg) continue;
+        
+        const topicX = (i + 0.5) * topicWidth;
+        const topicY = 50 + yStep;
+        
+        // 用戶思考節點（話題）
+        nodes.push({
+          id: `topic-${i}`,
+          text: extractKeywords(userMsg.content),
+          x: topicX,
+          y: topicY,
+          level: 1,
+          parentId: 'root',
+          type: 'topic'
+        });
+        
+        // AI洞察節點
+        const insightX = topicX;
+        const insightY = topicY + yStep * 0.8;
+        
+        nodes.push({
+          id: `insight-${i}`,
+          text: extractKeywords(aiMsg.content),
+          x: insightX,
+          y: insightY,
+          level: 2,
+          parentId: `topic-${i}`,
+          type: 'insight'
+        });
+      }
+    }
+
+    // 調整canvas高度以適應內容
+    const requiredHeight = conversationRounds > 0 ? 50 + yStep + yStep * 0.8 + 50 : 150;
+    if (canvas.height < requiredHeight) {
+      canvas.height = requiredHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
     
-    // 繪製連線 - 使用曲線讓圖形更美觀
+    // 繪製連線 - 使用直線
     ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     
     nodes.forEach(node => {
       if (node.parentId) {
         const parent = nodes.find(n => n.id === node.parentId);
         if (parent) {
-          // 繪製曲線連接
           ctx.beginPath();
-          const midX = (parent.x + node.x) / 2;
-          const midY = (parent.y + node.y) / 2;
-          
           ctx.moveTo(parent.x, parent.y);
-          ctx.quadraticCurveTo(midX, midY - 20, node.x, node.y);
+          ctx.lineTo(node.x, node.y);
           ctx.stroke();
         }
       }
@@ -182,7 +183,7 @@ export function MindMapVisualization({ messages, thoughtContent }: MindMapVisual
   
   return (
     <div className="bg-background border border-border rounded-lg p-4">
-      <div className="text-sm font-semibold mb-2 text-foreground">🧠 思考脈絡圖</div>
+      <div className="text-sm font-semibold mb-2 text-foreground">🧠 思考流程樹狀圖</div>
       <canvas 
         ref={canvasRef}
         className="w-full h-auto border border-border rounded"

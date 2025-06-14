@@ -21,7 +21,7 @@ export default function DraggableThoughtCard({
 
   const [{ isDragging }, drag] = useDrag({
     type: 'thought-card',
-    item: { id },
+    item: { id, type: 'thought-card' },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -29,13 +29,20 @@ export default function DraggableThoughtCard({
       const dropResult = monitor.getDropResult();
       if (item && dropResult) {
         const clientOffset = monitor.getClientOffset();
-        if (clientOffset) {
-          const container = ref.current?.parentElement;
+        if (clientOffset && ref.current) {
+          const container = ref.current.parentElement;
           if (container) {
             const containerRect = container.getBoundingClientRect();
+            const newX = clientOffset.x - containerRect.left - 160; // 卡片寬度的一半
+            const newY = clientOffset.y - containerRect.top - 100;  // 卡片高度的一半
+            
+            // 確保卡片不會超出容器邊界
+            const maxX = container.clientWidth - 320; // 卡片寬度
+            const maxY = container.clientHeight - 200; // 卡片高度
+            
             setPosition({
-              x: clientOffset.x - containerRect.left - 150, // 卡片寬度的一半
-              y: clientOffset.y - containerRect.top - 100,  // 卡片高度的一半
+              x: Math.max(0, Math.min(newX, maxX)),
+              y: Math.max(0, Math.min(newY, maxY))
             });
           }
         }

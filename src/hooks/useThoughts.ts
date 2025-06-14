@@ -5,6 +5,8 @@ export interface Thought {
   id: string;
   content: string;
   tags: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const STORAGE_KEY = 'thoughts-data';
@@ -14,12 +16,16 @@ const initialThoughts: Thought[] = [
   {
     id: "1",
     content: "🖋️ 今天想到一個好點子：可以用卡片方式整理思緒！",
-    tags: ["#創意", "✨"]
+    tags: ["#創意", "✨"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "2", 
     content: "🤔 要不要開始一個專屬於自己的行動記錄？",
-    tags: ["#行動", "🔥"]
+    tags: ["#行動", "🔥"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
@@ -34,7 +40,24 @@ export function useThoughts() {
   }, [thoughts]);
 
   const addThought = (thought: Thought) => {
-    setThoughts(prev => [...prev, thought]);
+    const newThought = {
+      ...thought,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setThoughts(prev => [...prev, newThought]);
+  };
+
+  const updateThought = (id: string, updates: Partial<Thought>) => {
+    setThoughts(prev => prev.map(thought => 
+      thought.id === id 
+        ? { ...thought, ...updates, updatedAt: new Date().toISOString() }
+        : thought
+    ));
+  };
+
+  const deleteThought = (id: string) => {
+    setThoughts(prev => prev.filter(thought => thought.id !== id));
   };
 
   const getThoughtById = (id: string) => {
@@ -45,6 +68,8 @@ export function useThoughts() {
     thoughts,
     setThoughts,
     addThought,
+    updateThought,
+    deleteThought,
     getThoughtById
   };
 }

@@ -26,26 +26,49 @@ export default function Index() {
     }
   ]);
   const [content, setContent] = useState("");
-  const [tags, setTags] = useState<string>("");
+  const [tags, setTags] = useState("");
   const [now, setNow] = useState(getTime());
 
   // 自動時間刷新
   import.meta.env.SSR || setTimeout(() => setNow(getTime()), 1000);
 
   function handleAdd() {
-    if (!content.trim()) return;
-    setThoughts([
-      ...thoughts,
-      {
-        id: String(++idSeed),
-        content,
-        tags: tags
-          .split(/[ ,]+/)
-          .filter(Boolean)
-      }
-    ]);
+    console.log("handleAdd called");
+    console.log("content:", content);
+    console.log("tags:", tags);
+    
+    if (!content.trim()) {
+      console.log("Content is empty, not adding");
+      return;
+    }
+    
+    const newId = String(++idSeed);
+    const processedTags = tags
+      .split(/[,\s]+/)
+      .filter(tag => tag.trim() !== "")
+      .map(tag => tag.trim());
+    
+    console.log("processedTags:", processedTags);
+    console.log("newId:", newId);
+    
+    const newThought = {
+      id: newId,
+      content: content.trim(),
+      tags: processedTags
+    };
+    
+    console.log("newThought:", newThought);
+    
+    setThoughts(prevThoughts => {
+      const updatedThoughts = [...prevThoughts, newThought];
+      console.log("updatedThoughts:", updatedThoughts);
+      return updatedThoughts;
+    });
+    
     setContent("");
     setTags("");
+    
+    console.log("Form reset completed");
   }
 
   return (

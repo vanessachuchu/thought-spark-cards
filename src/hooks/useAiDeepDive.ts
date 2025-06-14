@@ -9,19 +9,36 @@ export interface AiMessage {
   content: string;
 }
 
-export function useAiDeepDive(initThought: string) {
-  const [messages, setMessages] = useState<AiMessage[]>([
-    {
-      role: "system",
-      content:
-        "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
-    },
-    { role: "user", content: initThought }
-  ]);
+export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[], onConversationUpdate?: (messages: AiMessage[]) => void) {
+  const [messages, setMessages] = useState<AiMessage[]>(() => {
+    // 如果有初始對話記錄，使用它；否則使用預設的系統訊息
+    if (initialMessages && initialMessages.length > 0) {
+      console.log("useAiDeepDive: Loading existing conversation with", initialMessages.length, "messages");
+      return initialMessages;
+    }
+    
+    return [
+      {
+        role: "system",
+        content:
+          "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
+      },
+      { role: "user", content: initThought }
+    ];
+  });
+  
   const [answering, setAnswering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [apiKey, setApiKey] = useState(() => window.localStorage.getItem("openai_api_key") || "");
+
+  // 當 messages 更新時，通知父組件保存對話
+  useEffect(() => {
+    if (onConversationUpdate && messages.length > 2) { // 只有當有實際對話時才保存
+      console.log("useAiDeepDive: Conversation updated, saving", messages.length, "messages");
+      onConversationUpdate(messages);
+    }
+  }, [messages, onConversationUpdate]);
 
   // 主動更新API KEY/本地存儲
   const saveApiKey = useCallback((key: string) => {
@@ -123,16 +140,18 @@ export function useAiDeepDive(initThought: string) {
   );
 
   const reset = useCallback(() => {
-    setMessages([
+    const newMessages = [
       {
         role: "system",
         content:
           "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
       },
       { role: "user", content: initThought }
-    ]);
+    ];
+    setMessages(newMessages);
     setError(null);
     setAnswering(false);
+    console.log("useAiDeepDive: Conversation reset");
   }, [initThought]);
 
   return {

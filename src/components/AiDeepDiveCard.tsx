@@ -10,9 +10,18 @@ import { ActionPlanGenerator } from "./ActionPlanGenerator";
 /**
  * AI 深入自我探索卡片 (用於思緒內容自我提問、反思引導)
  */
-export function AiDeepDiveCard({ thoughtContent, onActionPlanGenerated }: { 
+export function AiDeepDiveCard({ 
+  thoughtContent, 
+  thoughtId,
+  initialConversation,
+  onActionPlanGenerated,
+  onConversationUpdate 
+}: { 
   thoughtContent: string;
+  thoughtId: string;
+  initialConversation?: Array<{role: "user" | "assistant" | "system"; content: string}>;
   onActionPlanGenerated?: (plan: string) => void;
+  onConversationUpdate?: (messages: Array<{role: "user" | "assistant" | "system"; content: string}>) => void;
 }) {
   const {
     messages,
@@ -22,7 +31,7 @@ export function AiDeepDiveCard({ thoughtContent, onActionPlanGenerated }: {
     saveApiKey,
     sendMessage,
     reset
-  } = useAiDeepDive(thoughtContent);
+  } = useAiDeepDive(thoughtContent, initialConversation, onConversationUpdate);
 
   const [input, setInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(!apiKey);

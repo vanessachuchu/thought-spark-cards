@@ -1,12 +1,21 @@
 
 import { useState, useEffect } from 'react';
 
+export interface AiConversation {
+  messages: Array<{
+    role: "user" | "assistant" | "system";
+    content: string;
+  }>;
+  lastUpdated: string;
+}
+
 export interface Thought {
   id: string;
   content: string;
   tags: string[];
   createdAt?: string;
   updatedAt?: string;
+  aiConversation?: AiConversation;
 }
 
 const STORAGE_KEY = 'thoughts-data';
@@ -68,6 +77,24 @@ export function useThoughts() {
     });
   };
 
+  const updateAiConversation = (thoughtId: string, messages: Array<{role: "user" | "assistant" | "system"; content: string}>) => {
+    console.log("useThoughts updateAiConversation called with thoughtId:", thoughtId, "messages count:", messages.length);
+    const aiConversation: AiConversation = {
+      messages,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    setThoughts(prev => {
+      const updated = prev.map(thought => 
+        thought.id === thoughtId 
+          ? { ...thought, aiConversation, updatedAt: new Date().toISOString() }
+          : thought
+      );
+      console.log("useThoughts updated thoughts after AI conversation update:", updated);
+      return updated;
+    });
+  };
+
   const deleteThought = (id: string) => {
     console.log("useThoughts deleteThought called with id:", id);
     console.log("useThoughts current thoughts before delete:", thoughts);
@@ -90,6 +117,7 @@ export function useThoughts() {
     setThoughts,
     addThought,
     updateThought,
+    updateAiConversation,
     deleteThought,
     getThoughtById
   };

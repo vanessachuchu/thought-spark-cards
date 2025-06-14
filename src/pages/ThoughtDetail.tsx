@@ -9,7 +9,7 @@ import { Edit, Trash2 } from "lucide-react";
 
 export default function ThoughtDetail() {
   const { id } = useParams<{ id: string }>();
-  const { getThoughtById, updateThought, deleteThought } = useThoughts();
+  const { getThoughtById, updateThought, updateAiConversation, deleteThought } = useThoughts();
   const { addTodo } = useTodos();
   const thought = getThoughtById(id || "");
   const [note, setNote] = useState("");
@@ -78,6 +78,12 @@ export default function ThoughtDetail() {
     });
     navigate("/todo", { state: { newActionPlan: plan } });
   }
+
+  // 處理 AI 對話更新
+  const handleConversationUpdate = (messages: Array<{role: "user" | "assistant" | "system"; content: string}>) => {
+    console.log("ThoughtDetail: Updating AI conversation for thought", thought.id);
+    updateAiConversation(thought.id, messages);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,6 +162,14 @@ export default function ThoughtDetail() {
                     </span>
                   ))}
                 </div>
+                {thought.aiConversation && (
+                  <div className="text-xs text-muted-foreground">
+                    💬 包含 {thought.aiConversation.messages.filter(m => m.role !== 'system').length} 則對話記錄
+                    <span className="ml-2">
+                      📅 {new Date(thought.aiConversation.lastUpdated).toLocaleString('zh-TW')}
+                    </span>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -164,8 +178,11 @@ export default function ThoughtDetail() {
           {!isEditing && (
             <div className="mb-6">
               <AiDeepDiveCard 
-                thoughtContent={thought.content} 
+                thoughtContent={thought.content}
+                thoughtId={thought.id}
+                initialConversation={thought.aiConversation?.messages}
                 onActionPlanGenerated={handleActionPlanGenerated}
+                onConversationUpdate={handleConversationUpdate}
               />
             </div>
           )}

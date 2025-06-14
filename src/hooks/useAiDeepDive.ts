@@ -19,11 +19,11 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
     
     return [
       {
-        role: "system",
+        role: "system" as const,
         content:
           "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
       },
-      { role: "user", content: initThought }
+      { role: "user" as const, content: initThought }
     ];
   });
   
@@ -54,14 +54,14 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
         return;
       }
       setError(null);
-      setMessages(prev => [...prev, { role: "user", content: userContent }]);
+      setMessages(prev => [...prev, { role: "user" as const, content: userContent }]);
       setAnswering(true);
 
       try {
         // 組chat messages (保留最近 6輪)
         const chatMessages = [
           ...messages.filter(msg => msg.role !== "system"),
-          { role: "user", content: userContent }
+          { role: "user" as const, content: userContent }
         ].slice(-6);
 
         // OpenAI stream fetch
@@ -98,7 +98,7 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
         let done = false;
 
         // 預先插入「assistant:」空訊息
-        setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+        setMessages(prev => [...prev, { role: "assistant" as const, content: "" }]);
 
         while (!done) {
           const { value, done: readerDone } = await reader.read();
@@ -140,13 +140,13 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
   );
 
   const reset = useCallback(() => {
-    const newMessages = [
+    const newMessages: AiMessage[] = [
       {
-        role: "system",
+        role: "system" as const,
         content:
           "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
       },
-      { role: "user", content: initThought }
+      { role: "user" as const, content: initThought }
     ];
     setMessages(newMessages);
     setError(null);

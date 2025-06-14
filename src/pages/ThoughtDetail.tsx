@@ -12,7 +12,6 @@ export default function ThoughtDetail() {
   const { getThoughtById, updateThought, updateAiConversation, deleteThought } = useThoughts();
   const { addTodo } = useTodos();
   const thought = getThoughtById(id || "");
-  const [note, setNote] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(thought?.content || "");
   const [editTags, setEditTags] = useState(thought?.tags.join(", ") || "");
@@ -116,7 +115,7 @@ export default function ThoughtDetail() {
         
         {/* 整合的思緒內容與AI探索卡片 */}
         <div className="bg-card rounded-xl shadow p-6 border border-border mb-8">
-          <div className="text-xl font-bold mb-4">💭 思緒內容與自我探索</div>
+          <div className="text-xl font-bold mb-4">💭 思緒內容與智慧探索</div>
           
           {/* 思緒內容區塊 */}
           <div className="mb-6 p-4 bg-accent/30 rounded-lg border border-accent">
@@ -187,28 +186,14 @@ export default function ThoughtDetail() {
             </div>
           )}
 
-          {/* 筆記區域 */}
+          {/* 轉為 To-do 按鈕 */}
           {!isEditing && (
-            <>
-              <div className="mb-4">
-                <div className="text-base font-semibold mb-2">✏️ 筆記／延伸反思</div>
-                <textarea
-                  rows={3}
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  className="w-full rounded border border-border px-3 py-2 mb-2"
-                  placeholder="寫下你的反思或筆記..."
-                />
-              </div>
-
-              {/* 轉為 To-do 按鈕 */}
-              <button
-                onClick={handleToDo}
-                className="bg-primary text-primary-foreground px-4 py-2 rounded font-semibold hover:bg-primary/80 transition"
-              >
-                轉為 To-do
-              </button>
-            </>
+            <button
+              onClick={handleToDo}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded font-semibold hover:bg-primary/80 transition"
+            >
+              轉為 To-do
+            </button>
           )}
         </div>
       </main>

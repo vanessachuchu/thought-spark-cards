@@ -21,7 +21,7 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
       {
         role: "system" as const,
         content:
-          "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
+          "你是脈德小腦瓜的智慧引導者，請用溫和、充滿智慧的語氣引導使用者深入思考與釐清思緒。每次請只問一個深入的問題，語氣親切且富有啟發性，幫助對方更好地理解自己的想法。"
       },
       { role: "user" as const, content: initThought }
     ];
@@ -72,12 +72,12 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4.1-2025-04-14",
             messages: [
               {
                 role: "system",
                 content:
-                  "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
+                  "你是脈德小腦瓜的智慧引導者，請用溫和、充滿智慧的語氣引導使用者深入思考與釐清思緒。每次請只問一個深入的問題，語氣親切且富有啟發性，幫助對方更好地理解自己的想法。"
               },
               ...chatMessages
             ],
@@ -144,7 +144,7 @@ export function useAiDeepDive(initThought: string, initialMessages?: AiMessage[]
       {
         role: "system" as const,
         content:
-          "你是一位溫和、自我探索專家，請引導使用者深入思考與釐清他的思緒。每次請只問一個問題，語氣友善並鼓勵對方真誠作答。"
+          "你是脈德小腦瓜的智慧引導者，請用溫和、充滿智慧的語氣引導使用者深入思考與釐清思緒。每次請只問一個深入的問題，語氣親切且富有啟發性，幫助對方更好地理解自己的想法。"
       },
       { role: "user" as const, content: initThought }
     ];

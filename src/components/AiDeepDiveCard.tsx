@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAiDeepDive } from "@/hooks/useAiDeepDive";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -36,8 +36,18 @@ export function AiDeepDiveCard({
   const [input, setInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(!apiKey);
   const [showMindMap, setShowMindMap] = useState(false);
+  const [hasStartedConversation, setHasStartedConversation] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // 進入頁面後自動開始對話（如果沒有現有對話且有API Key）
+  useEffect(() => {
+    if (apiKey && !hasStartedConversation && !initialConversation && messages.length <= 2) {
+      setHasStartedConversation(true);
+      // 自動發送第一個問句請求
+      sendMessage("請開始引導我探索這個思緒");
+    }
+  }, [apiKey, hasStartedConversation, initialConversation, messages.length, sendMessage]);
 
   function handleSend() {
     if (!input.trim()) return;
@@ -55,7 +65,7 @@ export function AiDeepDiveCard({
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow flex flex-col gap-3">
       <div className="font-bold text-base mb-2 flex items-center gap-2">
-        🌱 AI自我探索
+        🧠 脈德小腦瓜・智慧探索
         <div className="ml-auto flex gap-2">
           <button
             className="text-xs underline text-muted-foreground"
@@ -103,7 +113,7 @@ export function AiDeepDiveCard({
             onClick={() => setShowApiKey(false)}
             disabled={!apiKey}
           >
-            開始對話
+            開始智慧探索
           </Button>
           <div className="text-xs text-muted-foreground mt-1">
             API 金鑰只存於本機 localStorage。請勿存入生產、商業用途。
@@ -132,7 +142,7 @@ export function AiDeepDiveCard({
                   </div>
                   <div className="mt-1">
                     {msg.role === "assistant" ? (
-                      <span className="text-base">🤖</span>
+                      <span className="text-base">🧠</span>
                     ) : (
                       <span className="text-base">🙋</span>
                     )}
@@ -141,7 +151,7 @@ export function AiDeepDiveCard({
               ))}
             {answering && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
-                <span className="animate-pulse">🤖 正在回覆...</span>
+                <span className="animate-pulse">🧠 小腦瓜正在思考...</span>
               </div>
             )}
             {error && (
@@ -162,7 +172,7 @@ export function AiDeepDiveCard({
               value={input}
               onChange={e => setInput(e.target.value)}
               className="resize-none"
-              placeholder="回應AI的提問，或輸入自我探索的想法…"
+              placeholder="回應智慧探索的提問，或輸入你的想法…"
               disabled={answering}
               onKeyDown={e => {
                 if (e.key === "Enter" && !e.shiftKey) {

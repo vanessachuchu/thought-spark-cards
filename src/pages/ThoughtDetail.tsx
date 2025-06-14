@@ -1,7 +1,7 @@
-
 import { useParams, useNavigate, Link } from "react-router-dom";
 import TopNav from "@/components/TopNav";
 import { useState } from "react";
+import AiDeepDiveCard from "@/components/AiDeepDiveCard";
 
 export default function ThoughtDetail() {
   // 預設用 demo cards。後續可接資料層。
@@ -36,14 +36,24 @@ export default function ThoughtDetail() {
       <TopNav />
       <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <Link to="/" className="text-muted-foreground text-sm underline hover:text-primary">&larr; 返回 Today</Link>
+          <Link
+            to="/"
+            className="text-muted-foreground text-sm underline hover:text-primary"
+          >
+            &larr; 返回 Today
+          </Link>
         </div>
         <div className="bg-card rounded-xl shadow p-6 border border-border mb-8">
           <div className="text-xl font-bold mb-3">思緒內容</div>
           <div className="text-lg text-foreground mb-3">{thought.content}</div>
           <div className="flex gap-2 mb-3">
             {thought.tags.map(tag => (
-              <span key={tag} className="bg-accent px-2 py-0.5 rounded text-sm">{tag}</span>
+              <span
+                key={tag}
+                className="bg-accent px-2 py-0.5 rounded text-sm"
+              >
+                {tag}
+              </span>
             ))}
           </div>
           <div className="mt-6">
@@ -64,6 +74,8 @@ export default function ThoughtDetail() {
             轉為 To-do
           </button>
         </div>
+        {/* 新增 AI 自我探索卡片 */}
+        <AiDeepDiveCard thoughtContent={thought.content} />
       </main>
     </div>
   );

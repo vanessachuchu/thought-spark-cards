@@ -62,9 +62,9 @@ export default function Index() {
       <main className="max-w-5xl mx-auto px-6 py-8">
         {/* 頁面標題與新增思緒區塊 */}
         <div className="mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-          <div>
-            <div className="text-2xl font-bold text-primary mb-2" data-testid="today-date">{getToday()}</div>
-            <div className="text-lg text-muted-foreground">{now}</div>
+          <div className="flex-shrink-0">
+            <div className="text-xl font-bold text-primary mb-1" data-testid="today-date">{getToday()}</div>
+            <div className="text-sm text-muted-foreground">{now}</div>
           </div>
           
           {/* 新增思緒輸入區塊 */}

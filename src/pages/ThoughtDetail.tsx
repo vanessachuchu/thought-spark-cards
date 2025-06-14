@@ -33,21 +33,34 @@ export default function ThoughtDetail() {
             &larr; 返回 Today
           </Link>
         </div>
+        
+        {/* 整合的思緒內容與AI探索卡片 */}
         <div className="bg-card rounded-xl shadow p-6 border border-border mb-8">
-          <div className="text-xl font-bold mb-3">思緒內容</div>
-          <div className="text-lg text-foreground mb-3">{thought.content}</div>
-          <div className="flex gap-2 mb-3">
-            {thought.tags.map(tag => (
-              <span
-                key={tag}
-                className="bg-accent px-2 py-0.5 rounded text-sm"
-              >
-                {tag}
-              </span>
-            ))}
+          <div className="text-xl font-bold mb-4">💭 思緒內容與自我探索</div>
+          
+          {/* 思緒內容區塊 */}
+          <div className="mb-6 p-4 bg-accent/30 rounded-lg border border-accent">
+            <div className="text-lg text-foreground mb-3">{thought.content}</div>
+            <div className="flex gap-2 mb-3">
+              {thought.tags.map(tag => (
+                <span
+                  key={tag}
+                  className="bg-accent px-2 py-0.5 rounded text-sm"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="mt-6">
-            <div className="text-base font-semibold mb-1">✏️ 筆記／延伸反思</div>
+
+          {/* AI探索區域 */}
+          <div className="mb-6">
+            <AiDeepDiveCard thoughtContent={thought.content} />
+          </div>
+
+          {/* 筆記區域 */}
+          <div className="mb-4">
+            <div className="text-base font-semibold mb-2">✏️ 筆記／延伸反思</div>
             <textarea
               rows={3}
               value={note}
@@ -55,17 +68,16 @@ export default function ThoughtDetail() {
               className="w-full rounded border border-border px-3 py-2 mb-2"
               placeholder="寫下你的反思或筆記..."
             />
-            {/* 不做筆記儲存（暫存於本地） */}
           </div>
+
+          {/* 轉為 To-do 按鈕 */}
           <button
             onClick={handleToDo}
-            className="mt-6 bg-primary text-primary-foreground px-4 py-2 rounded font-semibold hover:bg-primary/80 transition"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded font-semibold hover:bg-primary/80 transition"
           >
             轉為 To-do
           </button>
         </div>
-        {/* 新增 AI 自我探索卡片 */}
-        <AiDeepDiveCard thoughtContent={thought.content} />
       </main>
     </div>
   );

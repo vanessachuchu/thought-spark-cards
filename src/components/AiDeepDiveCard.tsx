@@ -1,13 +1,19 @@
+
 import { useRef, useState } from "react";
 import { useAiDeepDive } from "@/hooks/useAiDeepDive";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Send } from "lucide-react";
+import { MindMapVisualization } from "./MindMapVisualization";
+import { ActionPlanGenerator } from "./ActionPlanGenerator";
 
 /**
  * AI 深入自我探索卡片 (用於思緒內容自我提問、反思引導)
  */
-export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
+export function AiDeepDiveCard({ thoughtContent, onActionPlanGenerated }: { 
+  thoughtContent: string;
+  onActionPlanGenerated?: (plan: string) => void;
+}) {
   const {
     messages,
     answering,
@@ -20,6 +26,7 @@ export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
 
   const [input, setInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(!apiKey);
+  const [showMindMap, setShowMindMap] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -30,20 +37,43 @@ export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
     inputRef.current?.focus();
   }
 
+  const handleActionPlanGenerated = (plan: string) => {
+    if (onActionPlanGenerated) {
+      onActionPlanGenerated(plan);
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow flex flex-col gap-3">
       <div className="font-bold text-base mb-2 flex items-center gap-2">
         🌱 AI自我探索
-        <button
-          className="ml-auto text-xs underline text-muted-foreground"
-          onClick={reset}
-          title="重啟對話"
-          aria-label="重啟對話"
-        >
-          <RefreshCcw size={15} className="inline mr-1 mb-1" />
-          重新開始
-        </button>
+        <div className="ml-auto flex gap-2">
+          <button
+            className="text-xs underline text-muted-foreground"
+            onClick={() => setShowMindMap(!showMindMap)}
+            title="顯示/隱藏思考脈絡圖"
+          >
+            {showMindMap ? '隱藏' : '顯示'}脈絡圖
+          </button>
+          <button
+            className="text-xs underline text-muted-foreground"
+            onClick={reset}
+            title="重啟對話"
+            aria-label="重啟對話"
+          >
+            <RefreshCcw size={15} className="inline mr-1 mb-1" />
+            重新開始
+          </button>
+        </div>
       </div>
+
+      {/* 思考脈絡圖 */}
+      {showMindMap && messages.length > 2 && (
+        <div className="mb-4">
+          <MindMapVisualization messages={messages} thoughtContent={thoughtContent} />
+        </div>
+      )}
+
       {/* API KEY 提示條區塊 */}
       {showApiKey ? (
         <div className="mb-2 flex flex-col gap-2">
@@ -109,6 +139,7 @@ export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
               <div className="text-xs text-red-500 mb-2">⚠️ {error}</div>
             )}
           </div>
+          
           {/* 傳訊息輸入 */}
           <form
             onSubmit={e => {
@@ -142,6 +173,16 @@ export function AiDeepDiveCard({ thoughtContent }: { thoughtContent: string }) {
               <Send size={18} />
             </Button>
           </form>
+          
+          {/* 行動方案生成器 */}
+          {messages.length > 2 && (
+            <ActionPlanGenerator 
+              messages={messages}
+              thoughtContent={thoughtContent}
+              onGenerateActionPlan={handleActionPlanGenerated}
+            />
+          )}
+          
           <button
             className="text-xs text-muted-foreground underline mt-2"
             onClick={() => setShowApiKey(true)}

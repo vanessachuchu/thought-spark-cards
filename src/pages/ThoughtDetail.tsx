@@ -21,6 +21,12 @@ export default function ThoughtDetail() {
     navigate("/todo");
   }
 
+  function handleActionPlanGenerated(plan: string) {
+    console.log("生成的行動方案:", plan);
+    // 可以在這裡處理生成的行動方案，例如保存到 localStorage 或導向 Todo 頁面
+    navigate("/todo", { state: { newActionPlan: plan } });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
@@ -55,7 +61,10 @@ export default function ThoughtDetail() {
 
           {/* AI探索區域 */}
           <div className="mb-6">
-            <AiDeepDiveCard thoughtContent={thought.content} />
+            <AiDeepDiveCard 
+              thoughtContent={thought.content} 
+              onActionPlanGenerated={handleActionPlanGenerated}
+            />
           </div>
 
           {/* 筆記區域 */}

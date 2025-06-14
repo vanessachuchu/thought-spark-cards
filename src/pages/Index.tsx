@@ -10,8 +10,6 @@ function getTime() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-let idSeed = 3; // for local demo
-
 export default function Index() {
   const [thoughts, setThoughts] = useState([
     {
@@ -42,7 +40,8 @@ export default function Index() {
       return;
     }
     
-    const newId = String(++idSeed);
+    // 使用時間戳確保 ID 唯一性
+    const newId = Date.now().toString();
     const processedTags = tags
       .split(/[,\s]+/)
       .filter(tag => tag.trim() !== "")

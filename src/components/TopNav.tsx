@@ -13,7 +13,7 @@ export default function TopNav() {
 
   return (
     <nav className="w-full flex items-center justify-between px-8 py-3 bg-white border-b border-border mb-6 shadow-sm sticky top-0 z-20">
-      <div className="text-xl font-bold tracking-tight text-primary select-none">🧠 脈得</div>
+      <div className="text-xl font-bold tracking-tight text-primary select-none">🧠 脈德</div>
       <div className="flex gap-4">
         {navLinks.map(link => (
           <Link

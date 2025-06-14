@@ -1,24 +1,14 @@
+
 import { useParams, useNavigate, Link } from "react-router-dom";
 import TopNav from "@/components/TopNav";
 import { useState } from "react";
 import AiDeepDiveCard from "@/components/AiDeepDiveCard";
+import { useThoughts } from "@/hooks/useThoughts";
 
 export default function ThoughtDetail() {
-  // 預設用 demo cards。後續可接資料層。
-  const demoThoughts = [
-    {
-      id: "1",
-      content: "🖋️ 今天想到一個好點子：可以用卡片方式整理思緒！",
-      tags: ["#創意", "✨"]
-    },
-    {
-      id: "2",
-      content: "🤔 要不要開始一個專屬於自己的行動記錄？",
-      tags: ["#行動", "🔥"]
-    }
-  ];
   const { id } = useParams<{ id: string }>();
-  const thought = demoThoughts.find(t => t.id === id) || {
+  const { getThoughtById } = useThoughts();
+  const thought = getThoughtById(id || "") || {
     id: "",
     content: "找不到此思緒卡片",
     tags: []

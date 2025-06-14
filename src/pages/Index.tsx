@@ -2,6 +2,7 @@
 import { useState } from "react";
 import TopNav from "@/components/TopNav";
 import ThoughtCard from "@/components/ThoughtCard";
+import { useThoughts } from "@/hooks/useThoughts";
 
 function getToday() {
   return new Date().toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" });
@@ -11,18 +12,7 @@ function getTime() {
 }
 
 export default function Index() {
-  const [thoughts, setThoughts] = useState([
-    {
-      id: "1",
-      content: "🖋️ 今天想到一個好點子：可以用卡片方式整理思緒！",
-      tags: ["#創意", "✨"]
-    },
-    {
-      id: "2",
-      content: "🤔 要不要開始一個專屬於自己的行動記錄？",
-      tags: ["#行動", "🔥"]
-    }
-  ]);
+  const { thoughts, addThought } = useThoughts();
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [now, setNow] = useState(getTime());
@@ -58,11 +48,7 @@ export default function Index() {
     
     console.log("newThought:", newThought);
     
-    setThoughts(prevThoughts => {
-      const updatedThoughts = [...prevThoughts, newThought];
-      console.log("updatedThoughts:", updatedThoughts);
-      return updatedThoughts;
-    });
+    addThought(newThought);
     
     setContent("");
     setTags("");

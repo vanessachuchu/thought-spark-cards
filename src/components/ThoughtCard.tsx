@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Trash2, Edit } from "lucide-react";
@@ -17,6 +16,7 @@ export default function ThoughtCard({ id, content, tags }: ThoughtCardProps) {
   const [editTags, setEditTags] = useState(tags.join(", "));
 
   const handleSave = () => {
+    console.log("ThoughtCard handleSave called for id:", id);
     const processedTags = editTags
       .split(/[,\s]+/)
       .filter(tag => tag.trim() !== "")
@@ -36,8 +36,13 @@ export default function ThoughtCard({ id, content, tags }: ThoughtCardProps) {
   };
 
   const handleDelete = () => {
+    console.log("ThoughtCard handleDelete called for id:", id);
     if (window.confirm("確定要刪除這個思緒卡片嗎？")) {
+      console.log("User confirmed deletion for id:", id);
       deleteThought(id);
+      console.log("deleteThought called for id:", id);
+    } else {
+      console.log("User cancelled deletion for id:", id);
     }
   };
 

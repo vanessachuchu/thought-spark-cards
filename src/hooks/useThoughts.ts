@@ -36,32 +36,53 @@ export function useThoughts() {
   });
 
   useEffect(() => {
+    console.log("useThoughts useEffect: saving thoughts to localStorage", thoughts);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(thoughts));
   }, [thoughts]);
 
   const addThought = (thought: Thought) => {
+    console.log("useThoughts addThought called with:", thought);
     const newThought = {
       ...thought,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setThoughts(prev => [...prev, newThought]);
+    console.log("useThoughts adding new thought:", newThought);
+    setThoughts(prev => {
+      const updated = [...prev, newThought];
+      console.log("useThoughts updated thoughts after add:", updated);
+      return updated;
+    });
   };
 
   const updateThought = (id: string, updates: Partial<Thought>) => {
-    setThoughts(prev => prev.map(thought => 
-      thought.id === id 
-        ? { ...thought, ...updates, updatedAt: new Date().toISOString() }
-        : thought
-    ));
+    console.log("useThoughts updateThought called with id:", id, "updates:", updates);
+    setThoughts(prev => {
+      const updated = prev.map(thought => 
+        thought.id === id 
+          ? { ...thought, ...updates, updatedAt: new Date().toISOString() }
+          : thought
+      );
+      console.log("useThoughts updated thoughts after update:", updated);
+      return updated;
+    });
   };
 
   const deleteThought = (id: string) => {
-    setThoughts(prev => prev.filter(thought => thought.id !== id));
+    console.log("useThoughts deleteThought called with id:", id);
+    console.log("useThoughts current thoughts before delete:", thoughts);
+    setThoughts(prev => {
+      const updated = prev.filter(thought => thought.id !== id);
+      console.log("useThoughts updated thoughts after delete:", updated);
+      console.log("useThoughts deleted thought with id:", id);
+      return updated;
+    });
   };
 
   const getThoughtById = (id: string) => {
-    return thoughts.find(t => t.id === id);
+    const found = thoughts.find(t => t.id === id);
+    console.log("useThoughts getThoughtById called with id:", id, "found:", found);
+    return found;
   };
 
   return {

@@ -8,6 +8,8 @@ export interface Todo {
   done: boolean;
   createdAt?: string;
   updatedAt?: string;
+  scheduledDate?: string; // 新增：排程日期
+  scheduledTime?: string; // 新增：排程時間 (HH:mm 格式)
 }
 
 const STORAGE_KEY = 'todos-data';
@@ -19,7 +21,9 @@ const initialTodos: Todo[] = [
     thoughtId: "1",
     done: false,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    scheduledDate: new Date().toISOString().split('T')[0],
+    scheduledTime: "09:00"
   },
   {
     id: "b",
@@ -27,7 +31,9 @@ const initialTodos: Todo[] = [
     thoughtId: "2",
     done: false,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    scheduledDate: new Date().toISOString().split('T')[0],
+    scheduledTime: "14:30"
   }
 ];
 
@@ -67,11 +73,17 @@ export function useTodos() {
     updateTodo(id, { done: !todos.find(t => t.id === id)?.done });
   };
 
+  // 新增：根據日期獲取待辦事項
+  const getTodosByDate = (date: string) => {
+    return todos.filter(todo => todo.scheduledDate === date);
+  };
+
   return {
     todos,
     addTodo,
     updateTodo,
     deleteTodo,
-    toggleTodo
+    toggleTodo,
+    getTodosByDate
   };
 }

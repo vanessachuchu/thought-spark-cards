@@ -1,0 +1,239 @@
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useTodos, Todo } from "@/hooks/useTodos";
+import { format } from "date-fns";
+import { zhTW } from "date-fns/locale";
+import { Clock, Plus, Edit, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+interface CalendarTimeTableProps {
+  selectedDate: Date;
+}
+
+export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
+  const { todos, addTodo, updateTodo, deleteTodo, toggleTodo, getTodosByDate } = useTodos();
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [newTodoContent, setNewTodoContent] = useState("");
+  const [newTodoTime, setNewTodoTime] = useState("09:00");
+
+  const selectedDateString = format(selectedDate, "yyyy-MM-dd");
+  const dayTodos = getTodosByDate(selectedDateString);
+
+  // 生成 24 小時的時間表
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 0; hour < 24; hour++) {
+      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+      const todosAtThisHour = dayTodos.filter(todo => {
+        if (!todo.scheduledTime) return false;
+        const todoHour = parseInt(todo.scheduledTime.split(':')[0]);
+        return todoHour === hour;
+      });
+      
+      slots.push({
+        time: timeString,
+        displayTime: `${hour.toString().padStart(2, '0')}:00`,
+        todos: todosAtThisHour
+      });
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
+
+  const handleAddTodo = () => {
+    if (!newTodoContent.trim()) return;
+    
+    addTodo({
+      content: newTodoContent.trim(),
+      done: false,
+      scheduledDate: selectedDateString,
+      scheduledTime: newTodoTime
+    });
+    
+    setNewTodoContent("");
+    setNewTodoTime("09:00");
+    setShowAddDialog(false);
+  };
+
+  const handleUpdateTodo = (todo: Todo, updates: Partial<Todo>) => {
+    updateTodo(todo.id, updates);
+    setEditingTodo(null);
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    if (window.confirm("確定要刪除這個待辦事項嗎？")) {
+      deleteTodo(id);
+    }
+  };
+
+  return (
+    <Card className="bg-white/80 border-stone-200/50 shadow-sm">
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-light text-stone-700">
+            {format(selectedDate, "MM月dd日 EEEE", { locale: zhTW })} 的行程
+          </CardTitle>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="bg-primary text-primary-foreground">
+                <Plus size={16} className="mr-1" />
+                新增行程
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>新增行程</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">時間</label>
+                  <Input
+                    type="time"
+                    value={newTodoTime}
+                    onChange={(e) => setNewTodoTime(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">內容</label>
+                  <Textarea
+                    placeholder="輸入待辦事項內容..."
+                    value={newTodoContent}
+                    onChange={(e) => setNewTodoContent(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleAddTodo} className="flex-1">
+                    新增
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowAddDialog(false)} className="flex-1">
+                    取消
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {timeSlots.map((slot) => (
+            <div key={slot.time} className="border-b border-stone-100 pb-2">
+              <div className="flex items-start gap-3">
+                <div className="w-16 text-sm text-stone-500 font-mono pt-1">
+                  {slot.displayTime}
+                </div>
+                <div className="flex-1 min-h-[2rem] bg-stone-50/50 rounded p-2">
+                  {slot.todos.length === 0 ? (
+                    <div className="text-stone-300 text-sm">─</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {slot.todos.map((todo) => (
+                        <div
+                          key={todo.id}
+                          className="flex items-center gap-2 bg-white rounded p-2 border border-stone-200 group"
+                        >
+                          <button
+                            onClick={() => toggleTodo(todo.id)}
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center text-xs transition-colors ${
+                              todo.done
+                                ? "bg-primary border-primary text-primary-foreground"
+                                : "bg-white border-stone-300"
+                            }`}
+                          >
+                            {todo.done ? "✓" : ""}
+                          </button>
+                          
+                          <div className="flex items-center gap-1 text-xs text-stone-500">
+                            <Clock size={12} />
+                            {todo.scheduledTime}
+                          </div>
+                          
+                          <span className={`text-sm flex-1 ${
+                            todo.done ? "line-through text-stone-400" : "text-stone-700"
+                          }`}>
+                            {todo.content}
+                          </span>
+                          
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingTodo(todo)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Edit size={12} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteTodo(todo.id)}
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+
+      {/* 編輯對話框 */}
+      {editingTodo && (
+        <Dialog open={!!editingTodo} onOpenChange={() => setEditingTodo(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>編輯行程</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">時間</label>
+                <Input
+                  type="time"
+                  value={editingTodo.scheduledTime || "09:00"}
+                  onChange={(e) => setEditingTodo({...editingTodo, scheduledTime: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">內容</label>
+                <Textarea
+                  value={editingTodo.content}
+                  onChange={(e) => setEditingTodo({...editingTodo, content: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleUpdateTodo(editingTodo, {
+                    content: editingTodo.content,
+                    scheduledTime: editingTodo.scheduledTime
+                  })} 
+                  className="flex-1"
+                >
+                  保存
+                </Button>
+                <Button variant="outline" onClick={() => setEditingTodo(null)} className="flex-1">
+                  取消
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </Card>
+  );
+}

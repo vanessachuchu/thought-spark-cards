@@ -1,77 +1,78 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* 核心顏色系統 - 使用正確的 HSL 格式 */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* 冥想暖色調色彩系統 - 使用正確的 HSL 格式 */
+    --background: 35 20% 98%;
+    --foreground: 20 10% 20%;
+    --card: 35 15% 96%;
+    --card-foreground: 20 10% 20%;
+    --popover: 35 15% 96%;
+    --popover-foreground: 20 10% 20%;
+    --primary: 25 75% 55%;
+    --primary-foreground: 35 20% 98%;
+    --secondary: 30 25% 90%;
+    --secondary-foreground: 20 10% 20%;
+    --muted: 30 20% 92%;
+    --muted-foreground: 20 5% 50%;
+    --accent: 35 30% 88%;
+    --accent-foreground: 20 10% 20%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 35 20% 98%;
+    --border: 30 15% 85%;
+    --input: 30 15% 85%;
+    --ring: 25 75% 55%;
     --radius: 0.75rem;
     
-    /* Enhanced gradients for idea management */
-    --gradient-primary: linear-gradient(135deg, hsl(120 53% 15%), hsl(168 85% 45%));
-    --gradient-secondary: linear-gradient(135deg, hsl(245 245 244), hsl(245 245 244));
-    --gradient-accent: linear-gradient(135deg, hsl(262 83% 58%), hsl(292 84% 61%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 53%), hsl(51 95% 53%));
+    /* 冥想暖色調漸層 */
+    --gradient-primary: linear-gradient(135deg, hsl(25 75% 55%), hsl(35 70% 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(30 25% 90%), hsl(35 20% 92%));
+    --gradient-accent: linear-gradient(135deg, hsl(20 60% 70%), hsl(30 65% 65%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 80% 65%), hsl(35 75% 60%));
     
-    /* Elegant shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(120 53% 15% / 0.2);
-    --shadow-glow: 0 0 40px hsl(262 83% 58% / 0.3);
-    --shadow-soft: 0 4px 20px -4px hsl(120 53% 15% / 0.1);
+    /* 優雅的暖色調陰影 */
+    --shadow-elegant: 0 10px 30px -10px hsl(25 75% 55% / 0.15);
+    --shadow-glow: 0 0 40px hsl(25 75% 55% / 0.2);
+    --shadow-soft: 0 4px 20px -4px hsl(25 75% 55% / 0.1);
     
-    /* Smooth animations */
+    /* 平滑動畫 */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   .dark {
-    --background: 28 25 23;
-    --foreground: 250 250 249;
-    --card: 41 37 36;
-    --card-foreground: 250 250 249;
-    --popover: 41 37 36;
-    --popover-foreground: 250 250 249;
-    --primary: 251 191 36;
-    --primary-foreground: 28 25 23;
-    --secondary: 41 37 36;
-    --secondary-foreground: 250 250 249;
-    --muted: 41 37 36;
-    --muted-foreground: 168 162 158;
-    --accent: 41 37 36;
-    --accent-foreground: 250 250 249;
-    --destructive: 239 68 68;
-    --destructive-foreground: 250 250 249;
-    --border: 68 64 60;
-    --input: 68 64 60;
-    --ring: 251 191 36;
+    --background: 20 15% 10%;
+    --foreground: 35 20% 95%;
+    --card: 20 10% 15%;
+    --card-foreground: 35 20% 95%;
+    --popover: 20 10% 15%;
+    --popover-foreground: 35 20% 95%;
+    --primary: 25 75% 55%;
+    --primary-foreground: 20 15% 10%;
+    --secondary: 20 10% 20%;
+    --secondary-foreground: 35 20% 95%;
+    --muted: 20 10% 20%;
+    --muted-foreground: 30 5% 60%;
+    --accent: 20 10% 20%;
+    --accent-foreground: 35 20% 95%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 35 20% 95%;
+    --border: 20 10% 25%;
+    --input: 20 10% 25%;
+    --ring: 25 75% 55%;
     
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(251 191 36), hsl(168 85% 45%));
-    --gradient-secondary: linear-gradient(135deg, hsl(41 37 36), hsl(41 37 36));
-    --gradient-accent: linear-gradient(135deg, hsl(262 83% 58%), hsl(292 84% 61%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 95% 53%), hsl(51 95% 53%));
+    /* 深色模式暖色調漸層 */
+    --gradient-primary: linear-gradient(135deg, hsl(25 75% 55%), hsl(35 70% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(20 10% 20%), hsl(20 10% 25%));
+    --gradient-accent: linear-gradient(135deg, hsl(20 60% 45%), hsl(30 65% 40%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 80% 45%), hsl(35 75% 40%));
     
-    --shadow-elegant: 0 10px 30px -10px hsl(251 191 36 / 0.3);
-    --shadow-glow: 0 0 40px hsl(262 83% 58% / 0.4);
-    --shadow-soft: 0 4px 20px -4px hsl(251 191 36 / 0.2);
+    --shadow-elegant: 0 10px 30px -10px hsl(25 75% 55% / 0.3);
+    --shadow-glow: 0 0 40px hsl(25 75% 55% / 0.4);
+    --shadow-soft: 0 4px 20px -4px hsl(25 75% 55% / 0.2);
   }
 }
 

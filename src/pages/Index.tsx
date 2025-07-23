@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Brain, TrendingUp, Eye } from "lucide-react";
+import { Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,22 +45,11 @@ export default function Index() {
   
   // 統計數據計算
   const today = new Date().toDateString();
-  const thisWeek = eachDayOfInterval({
-    start: startOfWeek(new Date()),
-    end: endOfWeek(new Date())
-  });
   
   const todayThoughts = thoughts.filter(thought => {
     const thoughtDate = new Date(thought.createdAt || Date.now()).toDateString();
     return thoughtDate === today;
   });
-  
-  const thisWeekThoughts = thoughts.filter(thought => {
-    const thoughtDate = new Date(thought.createdAt || Date.now());
-    return thisWeek.some(day => isSameDay(day, thoughtDate));
-  });
-  
-  const pendingTodos = todos.filter(todo => !todo.done);
   
   // 獲取指定日期的思緒
   const getThoughtsForDate = (date: Date) => {
@@ -124,19 +114,19 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
       {/* Hero Section */}
       <div className="bg-gradient-primary text-primary-foreground py-8 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="text-4xl mb-4">💡</div>
-          <h1 className="text-3xl font-bold mb-2">思緒探索空間</h1>
-          <p className="text-primary-foreground/80">捕捉靈感 • 深度對話 • 化為行動</p>
+          <div className="text-4xl mb-4">🧘‍♀️</div>
+          <h1 className="text-3xl font-light mb-2">思緒探索空間</h1>
+          <p className="text-primary-foreground/80 font-light">捕捉靈感 • 深度對話 • 化為行動</p>
         </div>
       </div>
 
       <main className="max-w-6xl mx-auto px-4 pb-6 -mt-6">
-        {/* 第一區塊：捕捉新思緒 */}
-        <Card className="mb-6 bg-gradient-to-br from-card via-background to-card shadow-elegant border border-border">
+        {/* 捕捉新思緒 */}
+        <Card className="mb-6 bg-card/80 backdrop-blur-sm shadow-elegant border border-border/50">
           <CardHeader className="relative">
             {/* 右上角的日期時間資訊 */}
             <div className="absolute top-4 right-4 text-right">
@@ -152,7 +142,7 @@ export default function Index() {
               <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
                 <span className="text-white text-xl">💭</span>
               </div>
-              <CardTitle className="text-xl">捕捉新思緒</CardTitle>
+              <CardTitle className="text-xl font-medium">捕捉新思緒</CardTitle>
             </div>
           </CardHeader>
           
@@ -220,71 +210,12 @@ export default function Index() {
           </CardContent>
         </Card>
 
-        {/* 統計概覽 */}
-        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-accent text-white border-0 shadow-glow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Brain className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{todayThoughts.length}</div>
-                  <div className="text-sm text-white/80">今日思緒</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-warm text-white border-0 shadow-glow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <CalendarIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{pendingTodos.length}</div>
-                  <div className="text-sm text-white/80">待完成</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-primary text-primary-foreground border-0 shadow-elegant">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{thisWeekThoughts.length}</div>
-                  <div className="text-sm text-primary-foreground/80">本週記錄</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-secondary border border-border shadow-soft">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">{thoughts.length}</div>
-                  <div className="text-sm text-muted-foreground">總記錄</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 第二區塊：思緒日曆與今日思緒 */}
+        {/* 思緒日曆與今日思緒 */}
         <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 左側：思緒日曆 */}
-          <Card className="shadow-soft border border-border bg-card">
+          <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="text-xl flex items-center gap-2 font-medium">
                 <CalendarIcon className="w-6 h-6" />
                 思緒日曆
               </CardTitle>
@@ -324,9 +255,9 @@ export default function Index() {
           </Card>
 
           {/* 右側：今日思緒 */}
-          <Card className="shadow-soft border border-border bg-card">
+          <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="text-xl flex items-center gap-2 font-medium">
                 <Brain className="w-6 h-6" />
                 今日思緒
                 {todayThoughts.length > 0 && (
@@ -344,7 +275,7 @@ export default function Index() {
                     .map((thought) => (
                       <div 
                         key={thought.id}
-                        className="p-3 border border-border rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="p-3 border border-border rounded-lg bg-background/60 hover:bg-muted/30 transition-colors cursor-pointer"
                         onClick={() => window.location.href = `/thought/${thought.id}`}
                       >
                         <div className="text-sm text-muted-foreground mb-1">
@@ -395,9 +326,9 @@ export default function Index() {
 
         {/* 選定日期的思緒內容（當不是今日時顯示） */}
         {!isSameDay(selectedDate, new Date()) && (
-          <Card className="mb-6 shadow-soft border border-border bg-card">
+          <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="text-xl flex items-center gap-2 font-medium">
                 <CalendarIcon className="w-6 h-6" />
                 {format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })} 的思緒
                 {getThoughtsForDate(selectedDate).length > 0 && (
@@ -435,10 +366,10 @@ export default function Index() {
           </Card>
         )}
 
-        {/* 第三區塊：時間表 */}
-        <Card className="mb-6 shadow-soft border border-border bg-card">
+        {/* 時間表 */}
+        <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
+            <CardTitle className="text-xl flex items-center gap-2 font-medium">
               <CalendarIcon className="w-6 h-6" />
               {format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })} 行程安排
             </CardTitle>

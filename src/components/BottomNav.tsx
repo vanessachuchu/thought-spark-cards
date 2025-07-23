@@ -1,5 +1,6 @@
+
 import { Link, useLocation } from "react-router-dom";
-import { Home, CheckSquare, Calendar, Brain, MessageCircle, Plus } from "lucide-react";
+import { Home, CheckSquare, Brain, MessageCircle, Plus } from "lucide-react";
 import { useTodos } from "@/hooks/useTodos";
 
 const navItems = [
@@ -15,12 +16,6 @@ const navItems = [
     icon: CheckSquare,
     key: "todo" as const,
     showBadge: true
-  },
-  { 
-    to: "/calendar", 
-    label: "日曆", 
-    icon: Calendar,
-    key: "calendar" as const
   },
   { 
     to: "/tags", 

@@ -2,104 +2,175 @@
 import { useState } from 'react';
 import { AiMessage } from '@/hooks/useAiDeepDive';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { ListTodo, TreeDeciduous, Sparkles } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ListTodo, Sparkles, Clock, AlertCircle, Circle } from 'lucide-react';
+import { useAiActionGenerator, ActionItem } from '@/hooks/useAiActionGenerator';
+import { useTodos } from '@/hooks/useTodos';
 
 interface ActionPlanGeneratorProps {
   messages: AiMessage[];
   thoughtContent: string;
   onGenerateActionPlan: (plan: string) => void;
+  thoughtId?: string;
 }
 
-function parseTodoListFromAI(messages: AiMessage[], thoughtContent: string): string {
-  // 根據最近的使用者與 AI 對話內容產生約 3~5 個建議 to-do
-  // 此為簡版，本地生成，更進階可串接 AI
-  const latestUserMsg = messages.filter(m => m.role === "user" && m.content !== thoughtContent).slice(-1)[0]?.content
-    || thoughtContent;
-  const lastAssistantMsg = messages.filter(m => m.role === "assistant").slice(-1)[0]?.content || "";
+const getPriorityColor = (priority: ActionItem['priority']) => {
+  switch (priority) {
+    case 'high': return 'bg-red-100 text-red-800 border-red-200';
+    case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'low': return 'bg-green-100 text-green-800 border-green-200';
+    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
 
-  // 簡單根據關鍵詞提出建議
-  let suggestions: string[] = [];
-
-  if (latestUserMsg.includes("專案") || lastAssistantMsg.includes("專案")) {
-    suggestions.push("規劃專案下一步行動");
-    suggestions.push("和團隊討論專案細節");
-    suggestions.push("設立專案時程與關鍵里程碑");
+const getPriorityIcon = (priority: ActionItem['priority']) => {
+  switch (priority) {
+    case 'high': return <AlertCircle className="w-3 h-3" />;
+    case 'medium': return <Circle className="w-3 h-3" />;
+    case 'low': return <Circle className="w-3 h-3" />;
+    default: return <Circle className="w-3 h-3" />;
   }
-  if (latestUserMsg.includes("學習") || lastAssistantMsg.includes("學習")) {
-    suggestions.push("搜尋相關主題資源");
-    suggestions.push("安排學習時間表");
-    suggestions.push("整理學習重點到筆記");
-  }
-  if (latestUserMsg.length > 14) {
-    suggestions.push("將想法拆分成更小的行動步驟");
-  }
-  // 保底建議
-  if (suggestions.length < 3) {
-    suggestions = [
-      "列出明確可執行的下一步",
-      "設定小目標並立即執行第一件事",
-      "每日檢視進度，調整處理方向"
-    ];
-  }
-
-  // 取前面 5 條
-  return suggestions.slice(0, 5)
-    .map((item, idx) => `${idx + 1}. ${item}`)
-    .join('\n');
-}
+};
 
 // 主元件
-export function ActionPlanGenerator({ messages, thoughtContent, onGenerateActionPlan }: ActionPlanGeneratorProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedTodos, setGeneratedTodos] = useState<string>('');
+export function ActionPlanGenerator({ messages, thoughtContent, onGenerateActionPlan, thoughtId }: ActionPlanGeneratorProps) {
+  const { generateActionPlan, isGenerating } = useAiActionGenerator();
+  const { addTodo } = useTodos();
+  const [generatedActions, setGeneratedActions] = useState<ActionItem[]>([]);
   const [showList, setShowList] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<Set<string>>(new Set());
 
-  const generateTodoList = async () => {
-    setIsGenerating(true);
-    // 在此如串接 AI 可換成真正API取得結果，現本地產生
-    const todoList = parseTodoListFromAI(messages, thoughtContent);
-    setGeneratedTodos(todoList);
+  const handleGenerateActions = async () => {
+    const actions = await generateActionPlan(thoughtContent, messages);
+    setGeneratedActions(actions);
     setShowList(true);
-    setIsGenerating(false);
+    // 預設選擇前3個高優先級的項目
+    const defaultSelected = new Set(
+      actions
+        .filter(action => action.priority === 'high')
+        .slice(0, 3)
+        .map(action => action.id)
+    );
+    setSelectedActions(defaultSelected);
   };
 
-  const handleSaveTodoList = () => {
-    onGenerateActionPlan(generatedTodos);
+  const toggleActionSelection = (actionId: string) => {
+    const newSelected = new Set(selectedActions);
+    if (newSelected.has(actionId)) {
+      newSelected.delete(actionId);
+    } else {
+      newSelected.add(actionId);
+    }
+    setSelectedActions(newSelected);
+  };
+
+  const handleSaveSelectedActions = () => {
+    const selectedItems = generatedActions.filter(action => selectedActions.has(action.id));
+    
+    selectedItems.forEach(action => {
+      addTodo({
+        content: action.content,
+        done: false,
+        thoughtId: thoughtId,
+        scheduledDate: new Date().toISOString().split('T')[0],
+        scheduledTime: "09:00"
+      });
+    });
+
+    // 為了兼容舊的接口，也調用原來的回調
+    const todoText = selectedItems
+      .map((action, idx) => `${idx + 1}. ${action.content}`)
+      .join('\n');
+    onGenerateActionPlan(todoText);
+    
+    setShowList(false);
+    setGeneratedActions([]);
+    setSelectedActions(new Set());
   };
 
   return (
     <div className="border-t border-border pt-4 mt-4">
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles size={16} />
-        <span className="text-sm font-semibold">AI 生成 To-do List</span>
+        <Sparkles className="w-4 h-4 text-primary" />
+        <span className="text-sm font-semibold">AI 智慧行動規劃</span>
       </div>
+      
       {!showList ? (
         <div className="text-center">
           <p className="text-sm text-muted-foreground mb-3">
-            當探索到一定階段，可請 AI 幫你產生具體可執行的待辦清單
+            基於你的思緒內容，AI 將為你生成具體可執行的行動計劃
           </p>
           <Button 
-            onClick={generateTodoList}
-            disabled={isGenerating || messages.length < 3}
-            className="w-full"
+            onClick={handleGenerateActions}
+            disabled={isGenerating}
+            className="w-full bg-gradient-primary text-primary-foreground"
           >
-            <ListTodo size={16} className="mr-2" />
-            {isGenerating ? '正在產生待辦清單...' : '生成 To-do List'}
+            <Sparkles className="w-4 h-4 mr-2" />
+            {isGenerating ? '正在分析並生成行動計劃...' : '生成智慧行動計劃'}
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
-          <Textarea
-            value={generatedTodos}
-            onChange={(e) => setGeneratedTodos(e.target.value)}
-            className="min-h-[140px] text-sm"
-            placeholder="可進一步編輯你的待辦清單..."
-          />
-          <div className="flex gap-2">
-            <Button onClick={handleSaveTodoList} className="flex-1">
-              <ListTodo size={16} className="mr-2" />
-              轉為 To-do
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            AI 為你生成了 {generatedActions.length} 個建議行動，請選擇要加入待辦清單的項目：
+          </div>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {generatedActions.map((action) => (
+              <Card 
+                key={action.id} 
+                className={`cursor-pointer transition-all ${
+                  selectedActions.has(action.id) 
+                    ? 'ring-2 ring-primary bg-primary/5' 
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => toggleActionSelection(action.id)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-4 h-4 rounded border-2 mt-1 flex items-center justify-center ${
+                      selectedActions.has(action.id) 
+                        ? 'bg-primary border-primary' 
+                        : 'border-muted-foreground'
+                    }`}>
+                      {selectedActions.has(action.id) && (
+                        <span className="text-white text-xs">✓</span>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className={`text-xs ${getPriorityColor(action.priority)}`}>
+                          {getPriorityIcon(action.priority)}
+                          <span className="ml-1">
+                            {action.priority === 'high' ? '高' : action.priority === 'medium' ? '中' : '低'}優先級
+                          </span>
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {action.category}
+                        </Badge>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {action.timeEstimate}
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium">{action.content}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="flex gap-2 pt-2">
+            <Button 
+              onClick={handleSaveSelectedActions} 
+              className="flex-1 bg-gradient-primary text-primary-foreground"
+              disabled={selectedActions.size === 0}
+            >
+              <ListTodo className="w-4 h-4 mr-2" />
+              加入待辦清單 ({selectedActions.size})
             </Button>
             <Button
               variant="outline"

@@ -2,13 +2,13 @@
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import TopNav from "@/components/TopNav";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
 import { CalendarTimeTable } from "@/components/CalendarTimeTable";
 import { Link } from "react-router-dom";
 import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { ArrowLeft } from "lucide-react";
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -53,10 +53,28 @@ export default function CalendarPage() {
   const datesWithTodos = getDatesWithTodos();
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-8">
-        <div className="text-2xl font-light mb-6 text-stone-700">📅 思緒日曆與行程表</div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm">返回首頁</span>
+          </Link>
+          
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-foreground">思緒日曆</h1>
+            <p className="text-sm text-muted-foreground">時間軸上的思維軌跡</p>
+          </div>
+          
+          <div className="w-16"></div>
+        </div>
+      </div>
+      
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-20">
         
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
           {/* 日曆區域 */}

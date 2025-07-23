@@ -1,8 +1,7 @@
 
-import TopNav from "@/components/TopNav";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Edit, Trash2, Plus, Calendar, Clock } from "lucide-react";
+import { Edit, Trash2, Plus, Calendar, Clock, ArrowLeft } from "lucide-react";
 import { useTodos } from "@/hooks/useTodos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,12 +85,30 @@ export default function TodoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <div className="text-2xl font-bold mb-6 text-primary">📌 行動清單 To-do</div>
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm">返回首頁</span>
+          </Link>
+          
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-foreground">我的行動清單</h1>
+            <p className="text-sm text-muted-foreground">AI 整理的具體行動方案</p>
+          </div>
+          
+          <div className="w-16"></div>
+        </div>
+      </div>
+      
+      <main className="max-w-4xl mx-auto px-6 py-6 pb-20">
         
         {/* 新增待辦區域 */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-soft border border-border bg-card">
           <CardHeader>
             <CardTitle className="text-lg">新增待辦事項</CardTitle>
           </CardHeader>
@@ -129,7 +146,7 @@ export default function TodoPage() {
             <Button
               onClick={handleAddTodo}
               disabled={!newTodoContent.trim()}
-              className="w-full"
+              className="w-full bg-gradient-primary text-primary-foreground hover:shadow-soft transition-smooth"
             >
               <Plus size={16} className="mr-2" />
               新增待辦事項
@@ -139,8 +156,16 @@ export default function TodoPage() {
 
         <div className="space-y-6">
           {Object.keys(groupedTodos).length === 0 ? (
-            <div className="text-muted-foreground text-center py-8">
-              暫無待辦，開始新增你的第一個行程吧！
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="text-4xl mb-4">📝</div>
+              <p className="text-lg mb-2">還沒有行動計劃</p>
+              <p className="text-sm mt-2">透過思緒探索讓 AI 為你制定具體行動</p>
+              <Link 
+                to="/"
+                className="inline-block mt-4 bg-gradient-accent text-white px-6 py-2 rounded-lg font-medium transition-smooth hover:shadow-soft"
+              >
+                ✨ 開始記錄想法
+              </Link>
             </div>
           ) : (
             Object.entries(groupedTodos)
@@ -150,7 +175,7 @@ export default function TodoPage() {
                 return dateA.localeCompare(dateB);
               })
               .map(([date, todosForDate]) => (
-                <Card key={date}>
+                <Card key={date} className="shadow-soft border border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Calendar size={20} />

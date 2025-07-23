@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import ThoughtCard from "@/components/ThoughtCard";
 import VoiceInputButton from "@/components/VoiceInputButton";
 import { CarouselThoughts } from "@/components/ui/carousel-thoughts";
+import { CalendarTimeTable } from "@/components/CalendarTimeTable";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
@@ -71,6 +72,21 @@ export default function Index() {
   // 獲取有思緒記錄的日期
   const getDatesWithThoughts = () => {
     return thoughts.map(thought => new Date(thought.createdAt || Date.now()));
+  };
+
+  // 獲取有待辦事項的日期
+  const getDatesWithTodos = () => {
+    const dates: Date[] = [];
+    const dateStrings = new Set();
+    
+    todos.forEach((todo) => {
+      if (todo.scheduledDate && !dateStrings.has(todo.scheduledDate)) {
+        dateStrings.add(todo.scheduledDate);
+        dates.push(new Date(todo.scheduledDate));
+      }
+    });
+    
+    return dates;
   };
 
   // 自動時間刷新
@@ -275,28 +291,36 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 左側：日曆 */}
               <div>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectedDate(date);
-                      setCurrentCardIndex(0); // 重置卡片索引
-                    }
-                  }}
-                  locale={zhTW}
-                  className="w-full"
-                  modifiers={{
-                    hasThoughts: getDatesWithThoughts()
-                  }}
-                  modifiersClassNames={{
-                    hasThoughts: "bg-primary/20 text-primary font-semibold"
-                  }}
-                />
-                <div className="mt-3 text-xs text-muted-foreground">
-                  <span className="inline-block w-3 h-3 bg-primary/20 rounded mr-2"></span>
-                  有思緒記錄的日期
-                </div>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setCurrentCardIndex(0); // 重置卡片索引
+                      }
+                    }}
+                    locale={zhTW}
+                    className="w-full"
+                    modifiers={{
+                      hasThoughts: getDatesWithThoughts(),
+                      hasTodos: getDatesWithTodos()
+                    }}
+                    modifiersClassNames={{
+                      hasThoughts: "bg-primary/20 text-primary font-semibold",
+                      hasTodos: "bg-secondary/20 text-secondary-foreground font-semibold"
+                    }}
+                  />
+                  <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 bg-primary/20 rounded"></span>
+                      <span>有思緒記錄</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 bg-secondary/20 rounded"></span>
+                      <span>有待辦行程</span>
+                    </div>
+                  </div>
               </div>
 
               {/* 右側：思緒卡片內容 */}
@@ -354,6 +378,18 @@ export default function Index() {
           </CardContent>
         </Card>
 
+        {/* 第三區塊：時間表 */}
+        <Card className="mb-6 shadow-soft border border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <CalendarIcon className="w-6 h-6" />
+              {format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })} 行程安排
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <CalendarTimeTable selectedDate={selectedDate} />
+          </CardContent>
+        </Card>
         
         {/* 浮動新靈感按鈕 */}
         <button

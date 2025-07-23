@@ -16,6 +16,19 @@ export interface Thought {
   createdAt?: string;
   updatedAt?: string;
   aiConversation?: AiConversation;
+  generatedActions?: ActionItem[];
+}
+
+export interface ActionItem {
+  id: string;
+  content: string;
+  priority: 'high' | 'medium' | 'low';
+  timeEstimate: string;
+  category: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 const STORAGE_KEY = 'thoughts-data';
@@ -95,6 +108,19 @@ export function useThoughts() {
     });
   };
 
+  const updateGeneratedActions = (thoughtId: string, actions: ActionItem[]) => {
+    console.log("useThoughts updateGeneratedActions called with thoughtId:", thoughtId, "actions count:", actions.length);
+    setThoughts(prev => {
+      const updated = prev.map(thought => 
+        thought.id === thoughtId 
+          ? { ...thought, generatedActions: actions, updatedAt: new Date().toISOString() }
+          : thought
+      );
+      console.log("useThoughts updated thoughts after actions update:", updated);
+      return updated;
+    });
+  };
+
   const deleteThought = (id: string) => {
     console.log("useThoughts deleteThought called with id:", id);
     console.log("useThoughts current thoughts before delete:", thoughts);
@@ -118,6 +144,7 @@ export function useThoughts() {
     addThought,
     updateThought,
     updateAiConversation,
+    updateGeneratedActions,
     deleteThought,
     getThoughtById
   };

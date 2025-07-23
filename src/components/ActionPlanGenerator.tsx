@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ListTodo, Sparkles, Clock, AlertCircle, Circle, Calendar } from 'lucide-react';
 import { useAiActionGenerator, ActionItem } from '@/hooks/useAiActionGenerator';
 import { useTodos } from '@/hooks/useTodos';
+import { useThoughts } from '@/hooks/useThoughts';
 import { ActionItemScheduler } from './ActionItemScheduler';
 
 interface ActionPlanGeneratorProps {
@@ -38,8 +39,14 @@ const getPriorityIcon = (priority: ActionItem['priority']) => {
 export function ActionPlanGenerator({ messages, thoughtContent, onGenerateActionPlan, thoughtId }: ActionPlanGeneratorProps) {
   const { generateActionPlan, isGenerating } = useAiActionGenerator();
   const { addTodo } = useTodos();
-  const [generatedActions, setGeneratedActions] = useState<ActionItem[]>([]);
-  const [showList, setShowList] = useState(false);
+  const { getThoughtById, updateGeneratedActions } = useThoughts();
+  
+  // 從思緒中獲取已生成的行動計畫
+  const thought = thoughtId ? getThoughtById(thoughtId) : null;
+  const savedActions = thought?.generatedActions || [];
+  
+  const [generatedActions, setGeneratedActions] = useState<ActionItem[]>(savedActions);
+  const [showList, setShowList] = useState(savedActions.length > 0);
   const [selectedActions, setSelectedActions] = useState<Set<string>>(new Set());
   const [schedulingActionId, setSchedulingActionId] = useState<string | null>(null);
 
@@ -47,6 +54,12 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     const actions = await generateActionPlan(thoughtContent, messages);
     setGeneratedActions(actions);
     setShowList(true);
+    
+    // 保存到思緒中
+    if (thoughtId) {
+      updateGeneratedActions(thoughtId, actions);
+    }
+    
     // 預設選擇前3個高優先級的項目
     const defaultSelected = new Set(
       actions

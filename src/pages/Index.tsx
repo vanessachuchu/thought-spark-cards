@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ThoughtCard from "@/components/ThoughtCard";
 import VoiceInputButton from "@/components/VoiceInputButton";
+import { CarouselThoughts } from "@/components/ui/carousel-thoughts";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
@@ -27,6 +28,7 @@ export default function Index() {
   const [tags, setTags] = useState("");
   const [now, setNow] = useState(getTime());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   
   // 語音識別功能
   const {
@@ -117,6 +119,91 @@ export default function Index() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 pb-6 -mt-6">
+        {/* 第一區塊：捕捉新思緒 */}
+        <Card className="mb-6 bg-gradient-to-br from-card via-background to-card shadow-elegant border border-border">
+          <CardHeader className="relative">
+            {/* 右上角的日期時間資訊 */}
+            <div className="absolute top-4 right-4 text-right">
+              <div className="text-sm text-muted-foreground" data-testid="today-date">
+                {getToday()}
+              </div>
+              <div className="text-xs text-muted-foreground/60">
+                {now}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
+                <span className="text-white text-xl">💭</span>
+              </div>
+              <CardTitle className="text-xl">捕捉新思緒</CardTitle>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <textarea
+                  value={content}
+                  onChange={e => setContent(e.target.value)}
+                  rows={4}
+                  placeholder="✨ 記錄你的想法..."
+                  className="w-full resize-none rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
+                />
+                {voiceError && (
+                  <div className="text-xs text-destructive mt-2 flex items-center gap-1">
+                    <span>⚠️</span>
+                    <span>{voiceError}</span>
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                  <span>🌿</span>
+                  <span>用心感受每一個當下</span>
+                  {voiceSupported && (
+                    <span className="ml-2">• 🎤 支援語音輸入</span>
+                  )}
+                </div>
+              </div>
+              
+              {voiceSupported && (
+                <VoiceInputButton
+                  isRecording={isRecording}
+                  onStartRecording={startRecording}
+                  onStopRecording={stopRecording}
+                  size="lg"
+                />
+              )}
+            </div>
+            
+            {isRecording && (
+              <div className="text-center py-2">
+                <div className="text-sm text-destructive animate-pulse flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-destructive rounded-full animate-ping"></div>
+                  <span>🎤 正在聆聽您的想法...</span>
+                </div>
+              </div>
+            )}
+            
+            <div>
+              <input
+                value={tags}
+                onChange={e => setTags(e.target.value)}
+                placeholder="🏷️ 標籤 (用逗號或空格分隔)"
+                className="w-full rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
+              />
+            </div>
+            
+            <button
+              onClick={handleAdd}
+              className="w-full bg-gradient-primary text-primary-foreground px-6 py-3 rounded-lg font-medium shadow-soft hover:shadow-elegant transition-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={!content.trim()}
+            >
+              <span>✨</span>
+              <span>記錄思緒</span>
+            </button>
+          </CardContent>
+        </Card>
+
         {/* 統計概覽 */}
         <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="bg-gradient-accent text-white border-0 shadow-glow">
@@ -176,172 +263,97 @@ export default function Index() {
           </Card>
         </div>
 
-        {/* 主要布局：日曆和思緒輸入 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* 左側：日曆區塊 */}
-          <Card className="shadow-soft border border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
-                <CalendarIcon className="w-6 h-6" />
-                思緒日曆
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                locale={zhTW}
-                className="w-full"
-                modifiers={{
-                  hasThoughts: getDatesWithThoughts()
-                }}
-                modifiersClassNames={{
-                  hasThoughts: "bg-primary/20 text-primary font-semibold"
-                }}
-              />
-              <div className="mt-3 text-xs text-muted-foreground">
-                <span className="inline-block w-3 h-3 bg-primary/20 rounded mr-2"></span>
-                有思緒記錄的日期
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 右側：思緒輸入 */}
-          <Card className="bg-gradient-to-br from-card via-background to-card shadow-elegant border border-border">
-            <CardHeader className="relative">
-              {/* 右上角的日期時間資訊 */}
-              <div className="absolute top-4 right-4 text-right">
-                <div className="text-sm text-muted-foreground" data-testid="today-date">
-                  {getToday()}
-                </div>
-                <div className="text-xs text-muted-foreground/60">
-                  {now}
+        {/* 第二區塊：思緒日曆（左右分割） */}
+        <Card className="mb-6 shadow-soft border border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <CalendarIcon className="w-6 h-6" />
+              思緒日曆
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 左側：日曆 */}
+              <div>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                      setCurrentCardIndex(0); // 重置卡片索引
+                    }
+                  }}
+                  locale={zhTW}
+                  className="w-full"
+                  modifiers={{
+                    hasThoughts: getDatesWithThoughts()
+                  }}
+                  modifiersClassNames={{
+                    hasThoughts: "bg-primary/20 text-primary font-semibold"
+                  }}
+                />
+                <div className="mt-3 text-xs text-muted-foreground">
+                  <span className="inline-block w-3 h-3 bg-primary/20 rounded mr-2"></span>
+                  有思緒記錄的日期
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
-                  <span className="text-white text-xl">💭</span>
-                </div>
-                <CardTitle className="text-xl">捕捉新思緒</CardTitle>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="flex gap-2 items-end">
-                <div className="flex-1">
-                  <textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
-                    rows={4}
-                    placeholder="✨ 記錄你的想法..."
-                    className="w-full resize-none rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
-                  />
-                  {voiceError && (
-                    <div className="text-xs text-destructive mt-2 flex items-center gap-1">
-                      <span>⚠️</span>
-                      <span>{voiceError}</span>
-                    </div>
+              {/* 右側：思緒卡片內容 */}
+              <div className="min-h-[300px] flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">
+                    {isSameDay(selectedDate, new Date()) ? '今日思緒' : format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })}
+                  </h3>
+                  {getThoughtsForDate(selectedDate).length > 0 && (
+                    <Badge variant="secondary">
+                      {getThoughtsForDate(selectedDate).length} 條記錄
+                    </Badge>
                   )}
-                  <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <span>🌿</span>
-                    <span>用心感受每一個當下</span>
-                    {voiceSupported && (
-                      <span className="ml-2">• 🎤 支援語音輸入</span>
-                    )}
-                  </div>
                 </div>
-                
-                {voiceSupported && (
-                  <VoiceInputButton
-                    isRecording={isRecording}
-                    onStartRecording={startRecording}
-                    onStopRecording={stopRecording}
-                    size="lg"
-                  />
+
+                {getThoughtsForDate(selectedDate).length > 0 ? (
+                  <CarouselThoughts
+                    currentIndex={currentCardIndex}
+                    onIndexChange={setCurrentCardIndex}
+                  >
+                    {getThoughtsForDate(selectedDate).map((thought) => (
+                      <ThoughtCard 
+                        key={thought.id} 
+                        {...thought} 
+                      />
+                    ))}
+                  </CarouselThoughts>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
+                    <div>
+                      <div className="text-4xl mb-4">📅</div>
+                      <p className="text-lg mb-2">
+                        {isSameDay(selectedDate, new Date()) 
+                          ? '今日還沒有思緒記錄' 
+                          : `${format(selectedDate, 'MM月dd日', { locale: zhTW })}沒有思緒記錄`
+                        }
+                      </p>
+                      <p className="text-sm">在上方輸入框記錄新的想法，或選擇其他有記錄的日期</p>
+                    </div>
+                  </div>
+                )}
+
+                {getThoughtsForDate(selectedDate).length > 0 && (
+                  <div className="mt-4 text-right">
+                    <Link
+                      to="/search"
+                      className="text-sm text-primary hover:text-primary/80 transition-smooth"
+                    >
+                      查看全部思緒
+                    </Link>
+                  </div>
                 )}
               </div>
-              
-              {isRecording && (
-                <div className="text-center py-2">
-                  <div className="text-sm text-destructive animate-pulse flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-destructive rounded-full animate-ping"></div>
-                    <span>🎤 正在聆聽您的想法...</span>
-                  </div>
-                </div>
-              )}
-              
-              <div>
-                <input
-                  value={tags}
-                  onChange={e => setTags(e.target.value)}
-                  placeholder="🏷️ 標籤 (用逗號或空格分隔)"
-                  className="w-full rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
-                />
-              </div>
-              
-              <button
-                onClick={handleAdd}
-                className="w-full bg-gradient-primary text-primary-foreground px-6 py-3 rounded-lg font-medium shadow-soft hover:shadow-elegant transition-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                disabled={!content.trim()}
-              >
-                <span>✨</span>
-                <span>記錄思緒</span>
-              </button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* 選定日期的思緒內容 */}
-        {getThoughtsForDate(selectedDate).length > 0 && (
-          <Card className="shadow-soft border border-border bg-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <span>
-                    {isSameDay(selectedDate, new Date()) ? '今日思緒' : format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })}
-                  </span>
-                  <Badge variant="secondary">
-                    {getThoughtsForDate(selectedDate).length} 條記錄
-                  </Badge>
-                </CardTitle>
-                <Link
-                  to="/search"
-                  className="text-sm text-primary hover:text-primary/80 transition-smooth"
-                >
-                  查看全部思緒
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {getThoughtsForDate(selectedDate).map((thought) => (
-                  <ThoughtCard 
-                    key={thought.id} 
-                    {...thought} 
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 空狀態：未選擇日期或該日期無思緒 */}
-        {getThoughtsForDate(selectedDate).length === 0 && (
-          <Card className="shadow-soft border border-border bg-card">
-            <CardContent className="text-center py-12 text-muted-foreground">
-              <div className="text-4xl mb-4">📅</div>
-              <p className="text-lg mb-2">
-                {isSameDay(selectedDate, new Date()) 
-                  ? '今日還沒有思緒記錄' 
-                  : `${format(selectedDate, 'MM月dd日', { locale: zhTW })}沒有思緒記錄`
-                }
-              </p>
-              <p className="text-sm">在右側輸入框記錄新的想法，或選擇其他有記錄的日期</p>
-            </CardContent>
-          </Card>
-        )}
         
         {/* 浮動新靈感按鈕 */}
         <button

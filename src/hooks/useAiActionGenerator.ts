@@ -6,6 +6,10 @@ export interface ActionItem {
   priority: 'high' | 'medium' | 'low';
   timeEstimate: string;
   category: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export function useAiActionGenerator() {
@@ -35,8 +39,16 @@ function analyzeAndGenerateActions(thoughtContent: string, aiMessages: any[] = [
   const content = thoughtContent.toLowerCase();
   const actions: ActionItem[] = [];
   
+  // 分析AI對話內容以獲得更準確的建議
+  const conversationContext = aiMessages.map(msg => msg.content).join(' ').toLowerCase();
+  const fullContext = (content + ' ' + conversationContext).toLowerCase();
+  
+  // 根據對話深度生成更具體的行動項目
+  const hasDeepAnalysis = conversationContext.length > 100;
+  const actionKeywords = extractActionKeywords(fullContext);
+  
   // 學習相關
-  if (content.includes('學習') || content.includes('了解') || content.includes('研究')) {
+  if (fullContext.includes('學習') || fullContext.includes('了解') || fullContext.includes('研究') || actionKeywords.includes('學習')) {
     actions.push({
       id: Date.now().toString() + '-1',
       content: '搜尋並整理相關學習資源',
@@ -184,6 +196,12 @@ function analyzeAndGenerateActions(thoughtContent: string, aiMessages: any[] = [
     );
   }
 
+  // 根據對話內容生成更個性化的建議
+  if (hasDeepAnalysis && actions.length < 5) {
+    const contextualActions = generateContextualActions(fullContext, conversationContext);
+    actions.push(...contextualActions);
+  }
+
   // 限制返回項目數量並按優先級排序
   return actions
     .sort((a, b) => {
@@ -191,4 +209,60 @@ function analyzeAndGenerateActions(thoughtContent: string, aiMessages: any[] = [
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     })
     .slice(0, 5);
+}
+
+function extractActionKeywords(text: string): string[] {
+  const keywords = [];
+  if (text.includes('學習') || text.includes('研讀')) keywords.push('學習');
+  if (text.includes('計劃') || text.includes('規劃')) keywords.push('規劃');
+  if (text.includes('運動') || text.includes('健身')) keywords.push('健康');
+  if (text.includes('工作') || text.includes('職場')) keywords.push('工作');
+  if (text.includes('關係') || text.includes('溝通')) keywords.push('人際');
+  return keywords;
+}
+
+function generateContextualActions(fullContext: string, conversationContext: string): ActionItem[] {
+  const actions: ActionItem[] = [];
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  // 根據對話深度生成具體行動
+  if (conversationContext.includes('目標') || conversationContext.includes('想要')) {
+    actions.push({
+      id: Date.now().toString() + '-contextual-1',
+      content: '將剛才的討論重點整理成具體目標',
+      priority: 'high',
+      timeEstimate: '20分鐘',
+      category: '規劃',
+      startDate: now.toISOString().split('T')[0],
+      startTime: '09:00'
+    });
+  }
+  
+  if (conversationContext.includes('困難') || conversationContext.includes('挑戰')) {
+    actions.push({
+      id: Date.now().toString() + '-contextual-2',
+      content: '制定應對困難的具體策略',
+      priority: 'high',
+      timeEstimate: '30分鐘',
+      category: '解決問題',
+      startDate: tomorrow.toISOString().split('T')[0],
+      startTime: '10:00'
+    });
+  }
+  
+  if (conversationContext.includes('感受') || conversationContext.includes('情緒')) {
+    actions.push({
+      id: Date.now().toString() + '-contextual-3',
+      content: '安排時間進行情緒梳理和自我照顧',
+      priority: 'medium',
+      timeEstimate: '15分鐘',
+      category: '自我關愛',
+      startDate: now.toISOString().split('T')[0],
+      startTime: '20:00'
+    });
+  }
+  
+  return actions;
 }

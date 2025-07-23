@@ -4,9 +4,10 @@ import { AiMessage } from '@/hooks/useAiDeepDive';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ListTodo, Sparkles, Clock, AlertCircle, Circle } from 'lucide-react';
+import { ListTodo, Sparkles, Clock, AlertCircle, Circle, Calendar } from 'lucide-react';
 import { useAiActionGenerator, ActionItem } from '@/hooks/useAiActionGenerator';
 import { useTodos } from '@/hooks/useTodos';
+import { ActionItemScheduler } from './ActionItemScheduler';
 
 interface ActionPlanGeneratorProps {
   messages: AiMessage[];
@@ -40,6 +41,7 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
   const [generatedActions, setGeneratedActions] = useState<ActionItem[]>([]);
   const [showList, setShowList] = useState(false);
   const [selectedActions, setSelectedActions] = useState<Set<string>>(new Set());
+  const [schedulingActionId, setSchedulingActionId] = useState<string | null>(null);
 
   const handleGenerateActions = async () => {
     const actions = await generateActionPlan(thoughtContent, messages);
@@ -73,8 +75,8 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
         content: action.content,
         done: false,
         thoughtId: thoughtId,
-        scheduledDate: new Date().toISOString().split('T')[0],
-        scheduledTime: "09:00"
+        scheduledDate: action.startDate || new Date().toISOString().split('T')[0],
+        scheduledTime: action.startTime || "09:00"
       });
     });
 
@@ -87,6 +89,20 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     setShowList(false);
     setGeneratedActions([]);
     setSelectedActions(new Set());
+  };
+
+  const handleScheduleAction = (actionId: string, schedule: {
+    startDate: string;
+    endDate?: string;
+    startTime: string;
+    endTime?: string;
+  }) => {
+    setGeneratedActions(prev => prev.map(action => 
+      action.id === actionId 
+        ? { ...action, ...schedule }
+        : action
+    ));
+    setSchedulingActionId(null);
   };
 
   return (
@@ -154,8 +170,31 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
                           <Clock className="w-3 h-3" />
                           {action.timeEstimate}
                         </div>
+                        {action.startDate && (
+                          <div className="flex items-center gap-1 text-xs text-primary">
+                            <Calendar className="w-3 h-3" />
+                            {action.startDate} {action.startTime}
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm font-medium">{action.content}</p>
+                      {schedulingActionId === action.id ? (
+                        <ActionItemScheduler
+                          action={action}
+                          onSchedule={handleScheduleAction}
+                          onCancel={() => setSchedulingActionId(null)}
+                        />
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2 text-xs"
+                          onClick={() => setSchedulingActionId(action.id)}
+                        >
+                          <Calendar className="w-3 h-3 mr-1" />
+                          設定時程
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

@@ -129,6 +129,14 @@
   .glass-dark {
     @apply bg-black/20 backdrop-blur-sm border border-white/10;
   }
+  
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }
 
 @layer base {

@@ -110,11 +110,31 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     startTime: string;
     endTime?: string;
   }) => {
-    setGeneratedActions(prev => prev.map(action => 
+    // 更新行動項目的時程
+    const updatedActions = generatedActions.map(action => 
       action.id === actionId 
         ? { ...action, ...schedule }
         : action
-    ));
+    );
+    setGeneratedActions(updatedActions);
+    
+    // 同時更新思緒中的生成行動
+    if (thoughtId) {
+      updateGeneratedActions(thoughtId, updatedActions);
+    }
+    
+    // 找到被安排的行動並自動加入待辦清單
+    const scheduledAction = updatedActions.find(action => action.id === actionId);
+    if (scheduledAction) {
+      addTodo({
+        content: scheduledAction.content,
+        done: false,
+        thoughtId: thoughtId,
+        scheduledDate: schedule.startDate,
+        scheduledTime: schedule.startTime
+      });
+    }
+    
     setSchedulingActionId(null);
   };
 

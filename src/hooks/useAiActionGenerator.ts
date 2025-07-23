@@ -39,12 +39,29 @@ function analyzeAndGenerateActions(thoughtContent: string, aiMessages: any[] = [
   const content = thoughtContent.toLowerCase();
   const actions: ActionItem[] = [];
   
-  // 分析AI對話內容以獲得更準確的建議
-  const conversationContext = aiMessages.map(msg => msg.content).join(' ').toLowerCase();
-  const fullContext = (content + ' ' + conversationContext).toLowerCase();
+  // 深度分析AI對話內容以獲得更準確的建議
+  const conversationContext = aiMessages
+    .filter(msg => msg.role === 'assistant') // 只分析AI的回應
+    .map(msg => msg.content)
+    .join(' ')
+    .toLowerCase();
+  
+  const userMessages = aiMessages
+    .filter(msg => msg.role === 'user')
+    .map(msg => msg.content)
+    .join(' ')
+    .toLowerCase();
+    
+  const fullContext = (content + ' ' + conversationContext + ' ' + userMessages).toLowerCase();
+  
+  // 基於對話內容生成具體行動
+  const conversationActions = analyzeConversationForActions(conversationContext, userMessages, content);
+  if (conversationActions.length > 0) {
+    actions.push(...conversationActions);
+  }
   
   // 根據對話深度生成更具體的行動項目
-  const hasDeepAnalysis = conversationContext.length > 100;
+  const hasDeepAnalysis = conversationContext.length > 50;
   const actionKeywords = extractActionKeywords(fullContext);
   
   // 學習相關
@@ -209,6 +226,102 @@ function analyzeAndGenerateActions(thoughtContent: string, aiMessages: any[] = [
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     })
     .slice(0, 5);
+}
+
+function analyzeConversationForActions(aiResponses: string, userMessages: string, originalThought: string): ActionItem[] {
+  const actions: ActionItem[] = [];
+  const now = new Date();
+  
+  // 分析AI的具體建議並轉為行動項目
+  const suggestions = extractSpecificSuggestions(aiResponses);
+  suggestions.forEach((suggestion, index) => {
+    actions.push({
+      id: Date.now().toString() + '-ai-' + index,
+      content: suggestion,
+      priority: index < 2 ? 'high' : 'medium',
+      timeEstimate: estimateTimeFromContent(suggestion),
+      category: categorizeSuggestion(suggestion),
+      startDate: now.toISOString().split('T')[0],
+      startTime: '09:00'
+    });
+  });
+  
+  // 分析用戶提到的具體需求
+  const userNeeds = extractUserNeeds(userMessages);
+  userNeeds.forEach((need, index) => {
+    actions.push({
+      id: Date.now().toString() + '-user-' + index,
+      content: need,
+      priority: 'high',
+      timeEstimate: '30分鐘',
+      category: '用戶需求',
+      startDate: now.toISOString().split('T')[0],
+      startTime: '10:00'
+    });
+  });
+  
+  return actions.slice(0, 3); // 限制數量
+}
+
+function extractSpecificSuggestions(aiText: string): string[] {
+  const suggestions: string[] = [];
+  const sentences = aiText.split(/[。！？\.\!\?]/).filter(s => s.trim().length > 10);
+  
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    // 找出包含動詞或建議詞彙的句子
+    if (
+      trimmed.includes('可以') || trimmed.includes('建議') || trimmed.includes('試試') || 
+      trimmed.includes('考慮') || trimmed.includes('開始') || trimmed.includes('安排') ||
+      trimmed.includes('制定') || trimmed.includes('執行') || trimmed.includes('進行') ||
+      trimmed.includes('聯繫') || trimmed.includes('討論') || trimmed.includes('準備')
+    ) {
+      // 轉換為行動導向的描述
+      let actionText = trimmed;
+      if (!actionText.match(/^(準備|安排|制定|執行|開始|聯繫|討論)/)) {
+        actionText = '根據AI建議：' + actionText;
+      }
+      suggestions.push(actionText);
+    }
+  }
+  
+  return suggestions.slice(0, 3);
+}
+
+function extractUserNeeds(userText: string): string[] {
+  const needs: string[] = [];
+  const sentences = userText.split(/[。！？\.\!\?]/).filter(s => s.trim().length > 5);
+  
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    // 找出表達需求或想要的句子
+    if (
+      trimmed.includes('想要') || trimmed.includes('希望') || trimmed.includes('需要') ||
+      trimmed.includes('想學') || trimmed.includes('想做') || trimmed.includes('想試') ||
+      trimmed.includes('計劃') || trimmed.includes('打算')
+    ) {
+      needs.push('實現想法：' + trimmed);
+    }
+  }
+  
+  return needs.slice(0, 2);
+}
+
+function estimateTimeFromContent(content: string): string {
+  if (content.includes('學習') || content.includes('研究')) return '60分鐘';
+  if (content.includes('討論') || content.includes('會議')) return '45分鐘';
+  if (content.includes('規劃') || content.includes('制定')) return '30分鐘';
+  if (content.includes('聯繫') || content.includes('查詢')) return '15分鐘';
+  return '30分鐘';
+}
+
+function categorizeSuggestion(content: string): string {
+  if (content.includes('學習') || content.includes('研究')) return '學習';
+  if (content.includes('工作') || content.includes('職業')) return '工作';
+  if (content.includes('健康') || content.includes('運動')) return '健康';
+  if (content.includes('關係') || content.includes('聯繫')) return '人際';
+  if (content.includes('規劃') || content.includes('計劃')) return '規劃';
+  return 'AI建議';
 }
 
 function extractActionKeywords(text: string): string[] {

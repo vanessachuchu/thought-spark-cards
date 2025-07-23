@@ -94,12 +94,6 @@ export default function ThoughtDetail() {
             />
           </div>
 
-          <button
-            onClick={handleToDo}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded font-semibold hover:bg-primary/80 transition"
-          >
-            轉為 To-do
-          </button>
         </div>
       </main>
     </div>

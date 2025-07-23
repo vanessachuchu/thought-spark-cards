@@ -1,9 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Calendar as CalendarIcon, CheckSquare } from "lucide-react";
 import ThoughtCard from "@/components/ThoughtCard";
+import VoiceInputButton from "@/components/VoiceInputButton";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
+import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { Link } from "react-router-dom";
 
 function getToday() {
@@ -20,6 +22,17 @@ export default function Index() {
   const [tags, setTags] = useState("");
   const [now, setNow] = useState(getTime());
   
+  // 語音識別功能
+  const {
+    isRecording,
+    transcript,
+    startRecording,
+    stopRecording,
+    resetTranscript,
+    isSupported: voiceSupported,
+    error: voiceError
+  } = useVoiceRecognition();
+  
   // 獲取今天的思緒和待辦事項
   const today = new Date().toDateString();
   const todayThoughts = thoughts.filter(thought => {
@@ -29,7 +42,18 @@ export default function Index() {
   const pendingTodos = todos.filter(todo => !todo.done);
 
   // 自動時間刷新
-  import.meta.env.SSR || setTimeout(() => setNow(getTime()), 1000);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(getTime()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 處理語音識別結果
+  useEffect(() => {
+    if (transcript && !isRecording) {
+      setContent(prev => prev + transcript);
+      resetTranscript();
+    }
+  }, [transcript, isRecording, resetTranscript]);
 
   function handleAdd() {
     console.log("handleAdd called");
@@ -139,19 +163,48 @@ export default function Index() {
               </div>
               
               <div className="space-y-4">
-                <div>
-                  <textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
-                    rows={4}
-                    placeholder="✨ 丟掉"
-                    className="w-full resize-none rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 md:px-4 md:py-3 text-sm md:text-base placeholder-muted-foreground transition-smooth"
-                  />
-                  <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <span>🌿</span>
-                    <span>用心感受每一個當下</span>
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <textarea
+                      value={content}
+                      onChange={e => setContent(e.target.value)}
+                      rows={4}
+                      placeholder="✨ 記錄你的想法..."
+                      className="w-full resize-none rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 md:px-4 md:py-3 text-sm md:text-base placeholder-muted-foreground transition-smooth"
+                    />
+                    {voiceError && (
+                      <div className="text-xs text-destructive mt-2 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>{voiceError}</span>
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                      <span>🌿</span>
+                      <span>用心感受每一個當下</span>
+                      {voiceSupported && (
+                        <span className="ml-2">• 🎤 支援語音輸入</span>
+                      )}
+                    </div>
                   </div>
+                  
+                  {voiceSupported && (
+                    <VoiceInputButton
+                      isRecording={isRecording}
+                      onStartRecording={startRecording}
+                      onStopRecording={stopRecording}
+                      size="lg"
+                    />
+                  )}
                 </div>
+                
+                {isRecording && (
+                  <div className="text-center py-2">
+                    <div className="text-sm text-destructive animate-pulse flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 bg-destructive rounded-full animate-ping"></div>
+                      <span>🎤 正在聆聽您的想法...</span>
+                    </div>
+                  </div>
+                )}
                 
                 <div>
                   <input

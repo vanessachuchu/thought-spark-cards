@@ -39,7 +39,28 @@ export function useTodos() {
     console.log('Adding new todo:', newTodo);
     setTodos(prev => {
       const updated = [...prev, newTodo];
-      console.log('Updated todos:', updated);
+      console.log('Updated todos list, total count:', updated.length);
+      console.log('All todos:', updated);
+      return updated;
+    });
+  };
+
+  // 新增：批量添加待辦事項
+  const addTodos = (todos: Array<Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>>) => {
+    console.log('addTodos called with:', todos.length, 'items');
+    
+    const newTodos = todos.map(todo => ({
+      ...todo,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    
+    console.log('Adding new todos:', newTodos);
+    setTodos(prev => {
+      const updated = [...prev, ...newTodos];
+      console.log('Updated todos list after batch add, total count:', updated.length);
+      console.log('All todos:', updated);
       return updated;
     });
   };
@@ -68,6 +89,7 @@ export function useTodos() {
   return {
     todos,
     addTodo,
+    addTodos,
     updateTodo,
     deleteTodo,
     toggleTodo,

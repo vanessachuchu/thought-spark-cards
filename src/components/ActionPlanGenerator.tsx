@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AiMessage } from '@/hooks/useAiDeepDive';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,6 +38,7 @@ const getPriorityIcon = (priority: ActionItem['priority']) => {
 
 // 主元件
 export function ActionPlanGenerator({ messages, thoughtContent, onGenerateActionPlan, thoughtId }: ActionPlanGeneratorProps) {
+  const navigate = useNavigate();
   const { generateActionPlan, isGenerating } = useAiActionGenerator();
   const { addTodo } = useTodos();
   const { getThoughtById, updateGeneratedActions } = useThoughts();
@@ -80,11 +82,13 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     setSelectedActions(newSelected);
   };
 
-  const handleSaveSelectedActions = () => {
+  const handleSaveSelectedActions = async () => {
     const selectedItems = generatedActions.filter(action => selectedActions.has(action.id));
     
-    selectedItems.forEach(action => {
-      // 確保每個待辦事項都有正確的資料結構
+    console.log(`開始處理 ${selectedItems.length} 個選中的行動項目`);
+    
+    // 批量添加待辦事項
+    const todoPromises = selectedItems.map(action => {
       const todoData = {
         content: action.content,
         done: false,
@@ -94,8 +98,14 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
       };
       
       console.log('Adding todo with data:', todoData);
-      addTodo(todoData);
+      return new Promise<void>((resolve) => {
+        addTodo(todoData);
+        resolve();
+      });
     });
+
+    // 等待所有待辦事項添加完成
+    await Promise.all(todoPromises);
 
     // 為了兼容舊的接口，也調用原來的回調
     const todoText = selectedItems
@@ -105,15 +115,13 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     
     console.log(`成功加入 ${selectedItems.length} 個待辦事項到清單`);
     
-    // 跳轉到待辦清單頁面
-    setTimeout(() => {
-      window.location.href = '/todo';
-    }, 100);
-    
     // 重置狀態
     setShowList(false);
     setGeneratedActions([]);
     setSelectedActions(new Set());
+    
+    // 使用 React Router 導航
+    navigate('/todo');
   };
 
   const handleScheduleAction = (actionId: string, schedule: {
@@ -149,10 +157,8 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
       console.log('Adding scheduled todo with data:', todoData);
       addTodo(todoData);
       
-      // 立即跳轉到待辦頁面顯示結果
-      setTimeout(() => {
-        window.location.href = '/todo';
-      }, 100);
+      // 使用 React Router 導航到待辦頁面
+      navigate('/todo');
     }
     
     setSchedulingActionId(null);

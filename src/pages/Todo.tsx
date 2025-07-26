@@ -64,9 +64,13 @@ export default function TodoPage() {
     }
   };
 
-  // 按日期分組待辦事項
-  const groupedTodos = todos.reduce((groups, todo) => {
-    const date = todo.scheduledDate || '未安排';
+  // 分類待辦事項：已排程和未排程
+  const scheduledTodos = todos.filter(todo => todo.scheduledDate && todo.scheduledTime);
+  const unscheduledTodos = todos.filter(todo => !todo.scheduledDate || !todo.scheduledTime);
+
+  // 按日期分組已排程的待辦事項
+  const groupedScheduledTodos = scheduledTodos.reduce((groups, todo) => {
+    const date = todo.scheduledDate!;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -75,8 +79,8 @@ export default function TodoPage() {
   }, {} as Record<string, typeof todos>);
 
   // 對每個日期的待辦事項按時間排序
-  Object.keys(groupedTodos).forEach(date => {
-    groupedTodos[date].sort((a, b) => {
+  Object.keys(groupedScheduledTodos).forEach(date => {
+    groupedScheduledTodos[date].sort((a, b) => {
       const timeA = a.scheduledTime || "00:00";
       const timeB = b.scheduledTime || "00:00";
       return timeA.localeCompare(timeB);
@@ -155,7 +159,7 @@ export default function TodoPage() {
         </Card>
 
         <div className="space-y-6">
-          {Object.keys(groupedTodos).length === 0 ? (
+          {todos.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <div className="text-4xl mb-4">📝</div>
               <p className="text-lg mb-2">還沒有行動計劃</p>
@@ -168,128 +172,243 @@ export default function TodoPage() {
               </Link>
             </div>
           ) : (
-            Object.entries(groupedTodos)
-              .sort(([dateA], [dateB]) => {
-                if (dateA === '未安排') return 1;
-                if (dateB === '未安排') return -1;
-                return dateA.localeCompare(dateB);
-              })
-              .map(([date, todosForDate]) => (
-                <Card key={date} className="shadow-soft border border-border bg-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Calendar size={20} />
-                      {date === '未安排' ? '未安排日期' : 
-                        new Date(date).toLocaleDateString('zh-TW', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          weekday: 'long'
-                        })
-                      }
-                      <span className="text-sm font-normal text-muted-foreground">
-                        ({todosForDate.length} 項)
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {todosForDate.map(todo => (
-                      <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border border-border group hover:bg-muted/50 transition-colors">
-                        <button
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                            todo.done
-                              ? "bg-primary border-primary"
-                              : "bg-white border-border"
-                          }`}
-                          onClick={() => toggleTodo(todo.id)}
-                          aria-label="打勾完成"
-                        >
-                          {todo.done ? (
-                            <span className="text-white text-lg font-bold">✓</span>
-                          ) : null}
-                        </button>
-                        
-                        {editingId === todo.id ? (
-                          <div className="flex-1 space-y-3">
-                            <div className="grid grid-cols-2 gap-2">
-                              <Input
-                                type="date"
-                                value={editDate}
-                                onChange={(e) => setEditDate(e.target.value)}
-                                className="text-sm"
-                              />
-                              <Input
-                                type="time"
-                                value={editTime}
-                                onChange={(e) => setEditTime(e.target.value)}
-                                className="text-sm"
-                              />
-                            </div>
-                            <Textarea
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
-                              className="text-sm"
-                              rows={2}
-                            />
-                            <div className="flex gap-2">
-                              <Button size="sm" onClick={handleSaveEdit}>
-                                保存
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                                取消
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                {todo.scheduledTime && (
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                    <Clock size={12} />
-                                    {todo.scheduledTime}
+            <>
+              {/* 已排程的待辦事項 */}
+              {Object.keys(groupedScheduledTodos).length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    <Calendar size={20} />
+                    已排程項目
+                  </h2>
+                  {Object.entries(groupedScheduledTodos)
+                    .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+                    .map(([date, todosForDate]) => (
+                      <Card key={date} className="shadow-soft border border-border bg-card">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Calendar size={20} />
+                            {new Date(date).toLocaleDateString('zh-TW', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              weekday: 'long'
+                            })}
+                            <span className="text-sm font-normal text-muted-foreground">
+                              ({todosForDate.length} 項)
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {todosForDate.map(todo => (
+                            <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border border-border group hover:bg-muted/50 transition-colors">
+                              <button
+                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                  todo.done
+                                    ? "bg-primary border-primary"
+                                    : "bg-white border-border"
+                                }`}
+                                onClick={() => toggleTodo(todo.id)}
+                                aria-label="打勾完成"
+                              >
+                                {todo.done ? (
+                                  <span className="text-white text-lg font-bold">✓</span>
+                                ) : null}
+                              </button>
+                              
+                              {editingId === todo.id ? (
+                                <div className="flex-1 space-y-3">
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Input
+                                      type="date"
+                                      value={editDate}
+                                      onChange={(e) => setEditDate(e.target.value)}
+                                      className="text-sm"
+                                    />
+                                    <Input
+                                      type="time"
+                                      value={editTime}
+                                      onChange={(e) => setEditTime(e.target.value)}
+                                      className="text-sm"
+                                    />
                                   </div>
-                                )}
+                                  <Textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="text-sm"
+                                    rows={2}
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button size="sm" onClick={handleSaveEdit}>
+                                      保存
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                                      取消
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      {todo.scheduledTime && (
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                                          <Clock size={12} />
+                                          {todo.scheduledTime}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span className={`text-base ${todo.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                                      {todo.content}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleStartEdit(todo.id, todo.content, todo.scheduledDate, todo.scheduledTime)}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <Edit size={16} />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDelete(todo.id)}
+                                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash2 size={16} />
+                                    </Button>
+                                  </div>
+                                  
+                                  {todo.thoughtId && (
+                                    <Link
+                                      to={`/thought/${todo.thoughtId}`}
+                                      className="text-sm underline text-muted-foreground hover:text-primary"
+                                    >
+                                      原始思緒
+                                    </Link>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    ))
+                  }
+                </div>
+              )}
+
+              {/* 未排程的待辦事項 */}
+              {unscheduledTodos.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    <Plus size={20} />
+                    待安排項目
+                  </h2>
+                  <Card className="shadow-soft border border-border bg-card">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Plus size={20} />
+                        未安排日期時間
+                        <span className="text-sm font-normal text-muted-foreground">
+                          ({unscheduledTodos.length} 項)
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {unscheduledTodos.map(todo => (
+                        <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border border-border group hover:bg-muted/50 transition-colors">
+                          <button
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              todo.done
+                                ? "bg-primary border-primary"
+                                : "bg-white border-border"
+                            }`}
+                            onClick={() => toggleTodo(todo.id)}
+                            aria-label="打勾完成"
+                          >
+                            {todo.done ? (
+                              <span className="text-white text-lg font-bold">✓</span>
+                            ) : null}
+                          </button>
+                          
+                          {editingId === todo.id ? (
+                            <div className="flex-1 space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  type="date"
+                                  value={editDate}
+                                  onChange={(e) => setEditDate(e.target.value)}
+                                  className="text-sm"
+                                />
+                                <Input
+                                  type="time"
+                                  value={editTime}
+                                  onChange={(e) => setEditTime(e.target.value)}
+                                  className="text-sm"
+                                />
                               </div>
-                              <span className={`text-base ${todo.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                                {todo.content}
-                              </span>
+                              <Textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="text-sm"
+                                rows={2}
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={handleSaveEdit}>
+                                  保存
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                                  取消
+                                </Button>
+                              </div>
                             </div>
-                            
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleStartEdit(todo.id, todo.content, todo.scheduledDate, todo.scheduledTime)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit size={16} />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleDelete(todo.id)}
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                              >
-                                <Trash2 size={16} />
-                              </Button>
-                            </div>
-                            
-                            {todo.thoughtId && (
-                              <Link
-                                to={`/thought/${todo.thoughtId}`}
-                                className="text-sm underline text-muted-foreground hover:text-primary"
-                              >
-                                原始思緒
-                              </Link>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))
+                          ) : (
+                            <>
+                              <div className="flex-1">
+                                <span className={`text-base ${todo.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                                  {todo.content}
+                                </span>
+                              </div>
+                              
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleStartEdit(todo.id, todo.content, todo.scheduledDate, todo.scheduledTime)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Edit size={16} />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDelete(todo.id)}
+                                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </div>
+                              
+                              {todo.thoughtId && (
+                                <Link
+                                  to={`/thought/${todo.thoughtId}`}
+                                  className="text-sm underline text-muted-foreground hover:text-primary"
+                                >
+                                  原始思緒
+                                </Link>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

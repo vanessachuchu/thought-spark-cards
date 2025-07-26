@@ -136,18 +136,18 @@ export default function Index() {
                     hasTodos: getDatesWithTodos()
                   }}
                   modifiersClassNames={{
-                    hasThoughts: "bg-primary/30 text-primary-foreground font-semibold border border-primary/50 relative after:content-['●'] after:absolute after:top-1 after:right-1 after:text-primary after:text-xs",
-                    hasTodos: "bg-accent/30 text-accent-foreground font-semibold border border-accent/50 relative before:content-['■'] before:absolute before:bottom-1 before:left-1 before:text-secondary-foreground before:text-xs"
+                    hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
+                    hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
                   }}
                 />
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
-                    <span className="inline-block w-3 h-3 bg-primary/30 rounded border border-primary/50"></span>
-                    <span>有思緒記錄 ●</span>
+                    <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
+                    <span>有思緒記錄</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
-                    <span className="inline-block w-3 h-3 bg-accent/30 rounded border border-accent/50"></span>
-                    <span>有待辦行程 ■</span>
+                    <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
+                    <span>有待辦行程</span>
                   </div>
                 </div>
               </CardContent>

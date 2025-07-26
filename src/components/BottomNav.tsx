@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Brain } from "lucide-react";
+import { Home, CheckSquare } from "lucide-react";
 
 const navItems = [
   { 
@@ -10,10 +10,10 @@ const navItems = [
     key: "home" as const
   },
   { 
-    to: "/tags", 
-    label: "標籤", 
-    icon: Brain,
-    key: "tags" as const
+    to: "/todo", 
+    label: "待辦", 
+    icon: CheckSquare,
+    key: "todo" as const
   }
 ];
 

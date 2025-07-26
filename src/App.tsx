@@ -12,6 +12,7 @@ import TagsPage from "./pages/Tags";
 import SearchPage from "./pages/Search";
 import SettingsPage from "./pages/Settings";
 import AuthPage from "./pages/Auth";
+import TodoPage from "./pages/Todo";
 
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
@@ -38,6 +39,7 @@ const App = () => {
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/thought/:id" element={<ThoughtDetail />} />
                 <Route path="/tags" element={<TagsPage />} />
+                <Route path="/todo" element={<TodoPage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />

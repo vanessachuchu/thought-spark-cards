@@ -94,18 +94,18 @@ export default function CalendarPage() {
                   hasTodos: datesWithTodos
                 }}
                 modifiersClassNames={{
-                  hasThoughts: "bg-blue-100 text-blue-700 font-medium",
-                  hasTodos: "bg-green-100 text-green-700 font-medium"
+                  hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
+                  hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
                 }}
               />
-              <div className="mt-4 text-sm text-stone-500 space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-100 rounded border border-blue-200"></div>
-                  <span className="font-light">有思緒記錄</span>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
+                  <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
+                  <span>有思緒記錄</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-100 rounded border border-green-200"></div>
-                  <span className="font-light">有待辦行程</span>
+                <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
+                  <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
+                  <span>有待辦行程</span>
                 </div>
               </div>
             </CardContent>

@@ -14,28 +14,7 @@ export interface Todo {
 
 const STORAGE_KEY = 'todos-data';
 
-const initialTodos: Todo[] = [
-  {
-    id: "a",
-    content: "🖋️ 今天想到一個好點子：可以用卡片方式整理思緒！",
-    thoughtId: "1",
-    done: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    scheduledDate: new Date().toISOString().split('T')[0],
-    scheduledTime: "09:00"
-  },
-  {
-    id: "b",
-    content: "🤔 要不要開始一個專屬於自己的行動記錄？",
-    thoughtId: "2",
-    done: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    scheduledDate: new Date().toISOString().split('T')[0],
-    scheduledTime: "14:30"
-  }
-];
+const initialTodos: Todo[] = [];
 
 export function useTodos() {
   const [todos, setTodos] = useState<Todo[]>(() => {

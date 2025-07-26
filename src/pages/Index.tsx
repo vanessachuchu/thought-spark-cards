@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
+
 export default function Index() {
   const {
     user,
@@ -54,7 +55,9 @@ export default function Index() {
     });
     return dates;
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
       {/* Hero Section */}
       <div className="bg-gradient-primary text-primary-foreground py-8 px-4">
         <div className="max-w-6xl mx-auto text-center">
@@ -65,7 +68,8 @@ export default function Index() {
 
       <main className="max-w-6xl mx-auto px-4 pb-6 -mt-6">
         {/* 未登入用戶歡迎區塊 */}
-        {!loading && !user && <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+        {!loading && !user && (
+          <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
             <CardContent className="text-center py-8">
               <div className="text-4xl mb-4">🧘‍♀️</div>
               <h2 className="text-2xl font-light mb-4">歡迎來到思緒探索空間</h2>
@@ -85,99 +89,125 @@ export default function Index() {
                 </p>
               </div>
             </CardContent>
-          </Card>}
+          </Card>
+        )}
 
         {/* 已登入用戶的主要內容 */}
-        {!loading && user && <>
-        {/* 思緒日曆 - 全寬度顯示 */}
-        <div className="mb-6">
-          <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                <CalendarIcon className="w-6 h-6" />
-                思緒日曆
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar mode="single" selected={selectedDate} onSelect={date => {
-                if (date) {
-                  setSelectedDate(date);
-                  setCurrentCardIndex(0); // 重置卡片索引
-                }
-              }} locale={zhTW} modifiers={{
-                hasThoughts: getDatesWithThoughts(),
-                hasTodos: getDatesWithTodos()
-              }} modifiersClassNames={{
-                hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
-                hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
-              }} className="w-full rounded-lg" />
-              <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
-                  <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
-                  <span>有思緒記錄</span>
-                </div>
-                <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
-                  <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
-                  <span>有待辦行程</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-
-
-        {/* 選定日期的思緒內容（當不是今日時顯示） */}
-        {!isSameDay(selectedDate, new Date()) && <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                <CalendarIcon className="w-6 h-6" />
-                {format(selectedDate, 'yyyy年MM月dd日', {
-                locale: zhTW
-              })} 的思緒
-                {getThoughtsForDate(selectedDate).length > 0 && <Badge variant="secondary">
-                    {getThoughtsForDate(selectedDate).length} 條記錄
-                  </Badge>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {getThoughtsForDate(selectedDate).length > 0 ? <CarouselThoughts currentIndex={currentCardIndex} onIndexChange={setCurrentCardIndex}>
-                  {getThoughtsForDate(selectedDate).map(thought => <ThoughtCard key={thought.id} {...thought} />)}
-                </CarouselThoughts> : <div className="flex items-center justify-center text-center text-muted-foreground min-h-[200px]">
-                  <div>
-                    <div className="text-4xl mb-4">📅</div>
-                    <p className="text-lg mb-2">
-                      {format(selectedDate, 'MM月dd日', {
-                    locale: zhTW
-                  })}沒有思緒記錄
-                    </p>
-                    <p className="text-sm">選擇其他有記錄的日期來查看</p>
+        {!loading && user && (
+          <>
+            {/* 日曆和思緒並排區域 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* 左側：思緒日曆 */}
+              <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2 font-medium">
+                    <CalendarIcon className="w-6 h-6" />
+                    思緒日曆
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Calendar 
+                    mode="single" 
+                    selected={selectedDate} 
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setCurrentCardIndex(0); // 重置卡片索引
+                      }
+                    }} 
+                    locale={zhTW} 
+                    modifiers={{
+                      hasThoughts: getDatesWithThoughts(),
+                      hasTodos: getDatesWithTodos()
+                    }} 
+                    modifiersClassNames={{
+                      hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
+                      hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
+                    }} 
+                    className="w-full rounded-lg" 
+                  />
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
+                      <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
+                      <span>有思緒記錄</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
+                      <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
+                      <span>有待辦行程</span>
+                    </div>
                   </div>
-                </div>}
-            </CardContent>
-          </Card>}
+                </CardContent>
+              </Card>
 
-        {/* 時間表 - 只顯示今日的 */}
-        {isSameDay(selectedDate, new Date()) && <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                <CalendarIcon className="w-6 h-6" />
-                今日行程安排
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <CalendarTimeTable selectedDate={selectedDate} />
-            </CardContent>
-          </Card>}
-        
-        {/* 浮動新思緒按鈕 */}
-        <button onClick={() => setIsNewThoughtDialogOpen(true)} className="fab">
-          ✨
-        </button>
+              {/* 右側：選定日期的思緒 */}
+              <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2 font-medium">
+                    <CalendarIcon className="w-6 h-6" />
+                    {format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })} 的思緒
+                    {getThoughtsForDate(selectedDate).length > 0 && (
+                      <Badge variant="secondary">
+                        {getThoughtsForDate(selectedDate).length} 條記錄
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {getThoughtsForDate(selectedDate).length > 0 ? (
+                    <CarouselThoughts 
+                      currentIndex={currentCardIndex} 
+                      onIndexChange={setCurrentCardIndex}
+                    >
+                      {getThoughtsForDate(selectedDate).map(thought => (
+                        <ThoughtCard key={thought.id} {...thought} />
+                      ))}
+                    </CarouselThoughts>
+                  ) : (
+                    <div className="flex items-center justify-center text-center text-muted-foreground min-h-[200px]">
+                      <div>
+                        <div className="text-4xl mb-4">📅</div>
+                        <p className="text-lg mb-2">
+                          {format(selectedDate, 'MM月dd日', { locale: zhTW })}沒有思緒記錄
+                        </p>
+                        <p className="text-sm">在這天記錄一些想法吧</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* 新思緒對話框 */}
-        <NewThoughtDialog isOpen={isNewThoughtDialogOpen} onClose={() => setIsNewThoughtDialogOpen(false)} />
-        </>}
+            {/* 時間表 - 只顯示今日的 */}
+            {isSameDay(selectedDate, new Date()) && (
+              <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2 font-medium">
+                    <CalendarIcon className="w-6 h-6" />
+                    今日行程安排
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <CalendarTimeTable selectedDate={selectedDate} />
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* 浮動新思緒按鈕 */}
+            <button 
+              onClick={() => setIsNewThoughtDialogOpen(true)} 
+              className="fab"
+            >
+              ✨
+            </button>
+
+            {/* 新思緒對話框 */}
+            <NewThoughtDialog 
+              isOpen={isNewThoughtDialogOpen} 
+              onClose={() => setIsNewThoughtDialogOpen(false)} 
+            />
+          </>
+        )}
       </main>
-    </div>;
+    </div>
+  );
 }

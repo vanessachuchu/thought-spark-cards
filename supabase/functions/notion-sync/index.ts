@@ -87,32 +87,72 @@ async function testNotionConnection(notionApiToken: string, notionDatabaseId: st
 async function syncTodosToNotion(notionApiToken: string, notionDatabaseId: string, todos: any[]) {
   console.log('Syncing todos to Notion:', todos.length);
   
+  // First, get the database schema to check available properties
+  const schemaResponse = await fetch(`https://api.notion.com/v1/databases/${notionDatabaseId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${notionApiToken}`,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2022-06-28',
+    },
+  });
+
+  if (!schemaResponse.ok) {
+    const errorText = await schemaResponse.text();
+    console.error('Failed to get database schema:', errorText);
+    throw new Error(`Notion API error: ${schemaResponse.status} - ${errorText}`);
+  }
+
+  const schema = await schemaResponse.json();
+  const properties = schema.properties;
+  console.log('Available properties for sync:', Object.keys(properties));
+  
   const results = [];
   
   for (const todo of todos) {
     try {
-      const notionPage = {
+      const notionPage: any = {
         parent: { database_id: notionDatabaseId },
-        properties: {
-          'Name': {
-            title: [
-              {
-                text: {
-                  content: todo.content || 'Untitled'
-                }
+        properties: {}
+      };
+
+      // Only add properties that exist in the database
+      if (properties['Name'] || properties['name'] || properties['Title'] || properties['title']) {
+        const nameProperty = properties['Name'] || properties['name'] || properties['Title'] || properties['title'];
+        const propertyName = Object.keys(properties).find(key => 
+          key.toLowerCase() === 'name' || key.toLowerCase() === 'title'
+        ) || 'Name';
+        
+        notionPage.properties[propertyName] = {
+          [nameProperty.type]: nameProperty.type === 'title' ? [
+            {
+              text: {
+                content: todo.content || 'Untitled'
               }
-            ]
-          },
-          'Status': {
+            }
+          ] : todo.content || 'Untitled'
+        };
+      }
+
+      // Add Status property if it exists
+      if (properties['Status'] || properties['status']) {
+        const statusProperty = properties['Status'] || properties['status'];
+        const propertyName = Object.keys(properties).find(key => 
+          key.toLowerCase() === 'status'
+        ) || 'Status';
+        
+        if (statusProperty.type === 'select') {
+          notionPage.properties[propertyName] = {
             select: {
               name: todo.done ? 'Done' : 'Not started'
             }
-          },
-          'Created time': {
-            created_time: {}
-          }
+          };
+        } else if (statusProperty.type === 'checkbox') {
+          notionPage.properties[propertyName] = {
+            checkbox: todo.done
+          };
         }
-      };
+      }
 
       // Add scheduled date if available
       if (todo.scheduledDate) {
@@ -157,6 +197,45 @@ async function getTodosFromNotion(notionApiToken: string, notionDatabaseId: stri
   console.log('Getting todos from Notion...');
   
   try {
+    // First, get the database schema to check available properties
+    const schemaResponse = await fetch(`https://api.notion.com/v1/databases/${notionDatabaseId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${notionApiToken}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28',
+      },
+    });
+
+    if (!schemaResponse.ok) {
+      const errorText = await schemaResponse.text();
+      console.error('Failed to get database schema:', errorText);
+      throw new Error(`Notion API error: ${schemaResponse.status} - ${errorText}`);
+    }
+
+    const schema = await schemaResponse.json();
+    const properties = schema.properties;
+    console.log('Available properties:', Object.keys(properties));
+
+    // Build query body - only add sorts if we have a suitable property
+    const queryBody: any = {};
+    
+    // Try to find a suitable sort property (created_time, Created time, or last_edited_time)
+    const sortableProps = ['Created time', 'created_time', 'Last edited time', 'last_edited_time'];
+    const availableSortProp = sortableProps.find(prop => properties[prop]);
+    
+    if (availableSortProp) {
+      queryBody.sorts = [
+        {
+          property: availableSortProp,
+          direction: 'descending'
+        }
+      ];
+      console.log('Using sort property:', availableSortProp);
+    } else {
+      console.log('No suitable sort property found, querying without sorting');
+    }
+
     const response = await fetch(`https://api.notion.com/v1/databases/${notionDatabaseId}/query`, {
       method: 'POST',
       headers: {
@@ -164,14 +243,7 @@ async function getTodosFromNotion(notionApiToken: string, notionDatabaseId: stri
         'Content-Type': 'application/json',
         'Notion-Version': '2022-06-28',
       },
-      body: JSON.stringify({
-        sorts: [
-          {
-            property: 'Created time',
-            direction: 'descending'
-          }
-        ]
-      }),
+      body: JSON.stringify(queryBody),
     });
 
     if (!response.ok) {
@@ -184,14 +256,71 @@ async function getTodosFromNotion(notionApiToken: string, notionDatabaseId: stri
     console.log('Retrieved Notion pages:', data.results.length);
 
     const todos = data.results.map((page: any) => {
-      const properties = page.properties;
+      const pageProperties = page.properties;
+      
+      // Find the title/name property dynamically
+      const titleProperty = Object.keys(pageProperties).find(key => {
+        const prop = pageProperties[key];
+        return prop.type === 'title' || key.toLowerCase() === 'name' || key.toLowerCase() === 'title';
+      });
+      
+      // Find the status property dynamically
+      const statusProperty = Object.keys(pageProperties).find(key => {
+        return key.toLowerCase() === 'status';
+      });
+      
+      // Find the date property dynamically
+      const dateProperty = Object.keys(pageProperties).find(key => {
+        const prop = pageProperties[key];
+        return prop.type === 'date' || key.toLowerCase() === 'date';
+      });
+      
+      // Find the created time property dynamically
+      const createdTimeProperty = Object.keys(pageProperties).find(key => {
+        const prop = pageProperties[key];
+        return prop.type === 'created_time' || key.toLowerCase().includes('created');
+      });
+      
+      // Extract content
+      let content = 'Untitled';
+      if (titleProperty && pageProperties[titleProperty]) {
+        const titleProp = pageProperties[titleProperty];
+        if (titleProp.title && titleProp.title[0]) {
+          content = titleProp.title[0].plain_text;
+        } else if (titleProp.rich_text && titleProp.rich_text[0]) {
+          content = titleProp.rich_text[0].plain_text;
+        }
+      }
+      
+      // Extract status
+      let done = false;
+      if (statusProperty && pageProperties[statusProperty]) {
+        const statusProp = pageProperties[statusProperty];
+        if (statusProp.select) {
+          done = statusProp.select.name === 'Done' || statusProp.select.name === '完成';
+        } else if (statusProp.checkbox !== undefined) {
+          done = statusProp.checkbox;
+        }
+      }
+      
+      // Extract scheduled date
+      let scheduledDate = null;
+      if (dateProperty && pageProperties[dateProperty] && pageProperties[dateProperty].date) {
+        scheduledDate = pageProperties[dateProperty].date.start;
+      }
+      
+      // Extract created time
+      let createdAt = page.created_time;
+      if (createdTimeProperty && pageProperties[createdTimeProperty]) {
+        createdAt = pageProperties[createdTimeProperty].created_time || createdAt;
+      }
       
       return {
         id: `notion-${page.id}`,
-        content: properties.Name?.title?.[0]?.plain_text || 'Untitled',
-        done: properties.Status?.select?.name === 'Done',
-        createdAt: properties['Created time']?.created_time || page.created_time,
-        scheduledDate: properties.Date?.date?.start || null,
+        content,
+        done,
+        createdAt,
+        scheduledDate,
         notionPageId: page.id,
         notionUrl: page.url
       };

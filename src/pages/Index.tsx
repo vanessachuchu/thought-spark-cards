@@ -1,15 +1,17 @@
 
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Brain } from "lucide-react";
+import { Calendar as CalendarIcon, Brain, User } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import ThoughtCard from "@/components/ThoughtCard";
 import NewThoughtDialog from "@/components/NewThoughtDialog";
 import { CarouselThoughts } from "@/components/ui/carousel-thoughts";
 import { CalendarTimeTable } from "@/components/CalendarTimeTable";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -23,6 +25,7 @@ function getTime() {
 }
 
 export default function Index() {
+  const { user, loading } = useAuth();
   const { thoughts } = useThoughts();
   const { todos } = useTodos();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -77,6 +80,34 @@ export default function Index() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 pb-6 -mt-6">
+        {/* 未登入用戶歡迎區塊 */}
+        {!loading && !user && (
+          <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+            <CardContent className="text-center py-8">
+              <div className="text-4xl mb-4">🧘‍♀️</div>
+              <h2 className="text-2xl font-light mb-4">歡迎來到思緒探索空間</h2>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                這是一個專為冥想和正念設計的數位空間。在這裡，你可以記錄日常想法、
+                與 AI 進行深度對話、將思緒轉化為具體行動，培養自我反思的習慣。
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Link to="/auth">
+                  <Button size="lg" className="gap-2">
+                    <User className="w-4 h-4" />
+                    開始使用
+                  </Button>
+                </Link>
+                <p className="text-sm text-muted-foreground">
+                  需要登入以保存和同步你的思緒記錄
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 已登入用戶的主要內容 */}
+        {!loading && user && (
+          <>
         {/* 思緒日曆與今日思緒 - 提到最前面作為主要內容 */}
         <div className="mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左側：思緒日曆 - 占2個網格 */}
@@ -265,6 +296,8 @@ export default function Index() {
           isOpen={isNewThoughtDialogOpen}
           onClose={() => setIsNewThoughtDialogOpen(false)}
         />
+        </>
+        )}
       </main>
     </div>
   );

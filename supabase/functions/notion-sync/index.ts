@@ -154,19 +154,17 @@ async function syncTodosToNotion(notionApiToken: string, notionDatabaseId: strin
         }
       }
 
-      // Add scheduled date if available and if Date property exists
-      if (todo.scheduledDate && (properties['Date'] || properties['date'])) {
-        const dateProperty = properties['Date'] || properties['date'];
-        const propertyName = Object.keys(properties).find(key => 
-          key.toLowerCase() === 'date'
-        ) || 'Date';
-        
-        if (dateProperty.type === 'date') {
-          notionPage.properties[propertyName] = {
-            date: {
-              start: todo.scheduledDate
-            }
-          };
+      // Add scheduled date if available - try to find date property
+      if (todo.scheduledDate) {
+        for (const [propName, propConfig] of Object.entries(properties)) {
+          if (propConfig.type === 'date') {
+            notionPage.properties[propName] = {
+              date: {
+                start: todo.scheduledDate
+              }
+            };
+            break; // Use first date property found
+          }
         }
       }
 

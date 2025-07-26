@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useTodos, Todo } from "@/hooks/useTodos";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import { Clock, Plus, Edit, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Clock, Edit, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -15,19 +15,16 @@ interface CalendarTimeTableProps {
 }
 
 export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
-  const { todos, addTodo, updateTodo, deleteTodo, toggleTodo, getTodosByDate } = useTodos();
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const { updateTodo, deleteTodo, toggleTodo, getTodosByDate } = useTodos();
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
-  const [newTodoContent, setNewTodoContent] = useState("");
-  const [newTodoTime, setNewTodoTime] = useState("09:00");
 
   const selectedDateString = format(selectedDate, "yyyy-MM-dd");
   const dayTodos = getTodosByDate(selectedDateString);
 
-  // 生成 24 小時的時間表
+  // 生成 6AM-11PM 的時間表
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 0; hour < 24; hour++) {
+    for (let hour = 6; hour <= 23; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`;
       const todosAtThisHour = dayTodos.filter(todo => {
         if (!todo.scheduledTime) return false;
@@ -46,20 +43,6 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
 
   const timeSlots = generateTimeSlots();
 
-  const handleAddTodo = () => {
-    if (!newTodoContent.trim()) return;
-    
-    addTodo({
-      content: newTodoContent.trim(),
-      done: false,
-      scheduledDate: selectedDateString,
-      scheduledTime: newTodoTime
-    });
-    
-    setNewTodoContent("");
-    setNewTodoTime("09:00");
-    setShowAddDialog(false);
-  };
 
   const handleUpdateTodo = (todo: Todo, updates: Partial<Todo>) => {
     updateTodo(todo.id, updates);
@@ -79,47 +62,6 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
           <CardTitle className="text-lg font-light text-stone-700">
             {format(selectedDate, "MM月dd日 EEEE", { locale: zhTW })} 的行程
           </CardTitle>
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="bg-primary text-primary-foreground">
-                <Plus size={16} className="mr-1" />
-                新增行程
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>新增行程</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">時間</label>
-                  <Input
-                    type="time"
-                    value={newTodoTime}
-                    onChange={(e) => setNewTodoTime(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">內容</label>
-                  <Textarea
-                    placeholder="輸入待辦事項內容..."
-                    value={newTodoContent}
-                    onChange={(e) => setNewTodoContent(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={handleAddTodo} className="flex-1">
-                    新增
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddDialog(false)} className="flex-1">
-                    取消
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </CardHeader>
       <CardContent>

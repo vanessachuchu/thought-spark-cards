@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar as CalendarIcon, User } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -58,15 +59,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-primary text-primary-foreground py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="text-4xl mb-4">🧘‍♀️</div>
-          <h1 className="text-3xl font-light mb-2">脈德小腦瓜</h1>
-        </div>
-      </div>
-
-      <main className="max-w-6xl mx-auto px-4 pb-6 -mt-6">
+      <main className="max-w-6xl mx-auto px-4 py-6">
         {/* 未登入用戶歡迎區塊 */}
         {!loading && !user && (
           <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">

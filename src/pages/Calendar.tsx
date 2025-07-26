@@ -111,57 +111,57 @@ export default function CalendarPage() {
             </CardContent>
           </Card>
 
-          {/* 時間表 */}
-          <div className="xl:col-span-2">
+          {/* 右側區域：思緒卡片和時間表 */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* 思緒卡片區域 */}
+            {selectedDateThoughts.length > 0 && (
+              <Card className="bg-white/80 border-stone-200/50 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-light text-stone-700">
+                    {format(selectedDate, "yyyy年MM月dd日", { locale: zhTW })} 的思緒
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {selectedDateThoughts.map(thought => (
+                      <div
+                        key={thought.id}
+                        className="border border-stone-200 rounded-lg p-4 hover:border-stone-300 transition-colors bg-white/50"
+                      >
+                        <div className="text-sm text-stone-400 mb-2 font-light">
+                          {format(new Date(parseInt(thought.id)), "HH:mm")}
+                        </div>
+                        <div className="mb-3 text-stone-700 font-light">{thought.content}</div>
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-2">
+                            {thought.tags.map(tag => (
+                              <span
+                                key={tag}
+                                className="bg-stone-100 px-2 py-0.5 rounded text-sm text-stone-600 font-light"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <Link
+                            to={`/thought/${thought.id}`}
+                            className="text-sm underline text-stone-600 hover:text-stone-500 font-light"
+                          >
+                            查看詳情
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* 時間表 */}
             <CalendarTimeTable selectedDate={selectedDate} />
           </div>
         </div>
 
-        {/* 思緒卡片區域 */}
-        {selectedDateThoughts.length > 0 && (
-          <div className="mt-8">
-            <Card className="bg-white/80 border-stone-200/50 shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-light text-stone-700">
-                  {format(selectedDate, "yyyy年MM月dd日", { locale: zhTW })} 的思緒
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {selectedDateThoughts.map(thought => (
-                    <div
-                      key={thought.id}
-                      className="border border-stone-200 rounded-lg p-4 hover:border-stone-300 transition-colors bg-white/50"
-                    >
-                      <div className="text-sm text-stone-400 mb-2 font-light">
-                        {format(new Date(parseInt(thought.id)), "HH:mm")}
-                      </div>
-                      <div className="mb-3 text-stone-700 font-light">{thought.content}</div>
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-2">
-                          {thought.tags.map(tag => (
-                            <span
-                              key={tag}
-                              className="bg-stone-100 px-2 py-0.5 rounded text-sm text-stone-600 font-light"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <Link
-                          to={`/thought/${thought.id}`}
-                          className="text-sm underline text-stone-600 hover:text-stone-500 font-light"
-                        >
-                          查看詳情
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </main>
     </div>
   );

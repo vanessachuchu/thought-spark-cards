@@ -49,11 +49,10 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
 
   // 處理語音識別結果
   useEffect(() => {
-    if (transcript && !isRecording) {
-      setContent(prev => prev + transcript);
-      resetTranscript();
+    if (transcript) {
+      setContent(transcript);
     }
-  }, [transcript, isRecording, resetTranscript]);
+  }, [transcript]);
 
   // 重置對話框狀態
   useEffect(() => {
@@ -85,6 +84,11 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
     setRecordedThoughtContent(content.trim());
     setContent("");
     setTags("");
+    
+    // 記錄思緒後關閉對話框，用戶會回到原先頁面看到新思緒
+    setTimeout(() => {
+      onClose();
+    }, 500);
   }
 
   function handleStartAiChat() {
@@ -174,14 +178,6 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
                   </div>
                 )}
                 
-                <div>
-                  <input
-                    value={tags}
-                    onChange={e => setTags(e.target.value)}
-                    placeholder="🏷️ 標籤 (用逗號或空格分隔)"
-                    className="w-full rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
-                  />
-                </div>
                 
                 <div className="flex gap-3">
                   <button

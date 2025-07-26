@@ -116,22 +116,53 @@ async function syncTodosToNotion(notionApiToken: string, notionDatabaseId: strin
         properties: {}
       };
 
-      // Only add properties that exist in the database
-      if (properties['Name'] || properties['name'] || properties['Title'] || properties['title']) {
-        const nameProperty = properties['Name'] || properties['name'] || properties['Title'] || properties['title'];
-        const propertyName = Object.keys(properties).find(key => 
-          key.toLowerCase() === 'name' || key.toLowerCase() === 'title'
-        ) || 'Name';
-        
-        notionPage.properties[propertyName] = {
-          [nameProperty.type]: nameProperty.type === 'title' ? [
-            {
-              text: {
-                content: todo.content || 'Untitled'
+      // Find title/name property - try exact match first, then case-insensitive
+      let titlePropertyName = null;
+      let titleProperty = null;
+      
+      // Try exact property name matches
+      const titleKeys = ['專案名稱', 'Name', 'name', 'Title', 'title', '名稱', '標題'];
+      for (const key of titleKeys) {
+        if (properties[key]) {
+          titlePropertyName = key;
+          titleProperty = properties[key];
+          break;
+        }
+      }
+      
+      // If no exact match, find by type
+      if (!titlePropertyName) {
+        titlePropertyName = Object.keys(properties).find(key => {
+          const prop = properties[key];
+          return prop.type === 'title';
+        });
+        if (titlePropertyName) {
+          titleProperty = properties[titlePropertyName];
+        }
+      }
+      
+      if (titlePropertyName && titleProperty) {
+        if (titleProperty.type === 'title') {
+          notionPage.properties[titlePropertyName] = {
+            title: [
+              {
+                text: {
+                  content: todo.content || 'Untitled'
+                }
               }
-            }
-          ] : todo.content || 'Untitled'
-        };
+            ]
+          };
+        } else if (titleProperty.type === 'rich_text') {
+          notionPage.properties[titlePropertyName] = {
+            rich_text: [
+              {
+                text: {
+                  content: todo.content || 'Untitled'
+                }
+              }
+            ]
+          };
+        }
       }
 
       // Add Status property if it exists

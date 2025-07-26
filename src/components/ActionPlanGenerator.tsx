@@ -99,6 +99,11 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
       .join('\n');
     onGenerateActionPlan(todoText);
     
+    // 跳轉到待辦清單頁面並顯示成功訊息
+    setTimeout(() => {
+      window.location.href = '/todo';
+    }, 500);
+    
     setShowList(false);
     setGeneratedActions([]);
     setSelectedActions(new Set());

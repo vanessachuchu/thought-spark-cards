@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TodoPage() {
   const { todos, addTodo, updateTodo, deleteTodo, toggleTodo } = useTodos();
+  
+  console.log('TodoPage render - todos:', todos);
   const [newTodoContent, setNewTodoContent] = useState("");
   const [newTodoDate, setNewTodoDate] = useState(new Date().toISOString().split('T')[0]);
   const [newTodoTime, setNewTodoTime] = useState("09:00");

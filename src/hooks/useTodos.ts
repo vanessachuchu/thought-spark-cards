@@ -27,20 +27,21 @@ export function useTodos() {
   }, [todos]);
 
   const addTodo = (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
-    // Check for duplicates based on content
-    const isDuplicate = todos.some(existingTodo => existingTodo.content.trim() === todo.content.trim());
-    if (isDuplicate) {
-      console.warn('Duplicate todo detected, skipping:', todo.content);
-      return;
-    }
+    console.log('addTodo called with:', todo);
     
     const newTodo = {
       ...todo,
-      id: Date.now().toString(),
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setTodos(prev => [...prev, newTodo]);
+    
+    console.log('Adding new todo:', newTodo);
+    setTodos(prev => {
+      const updated = [...prev, newTodo];
+      console.log('Updated todos:', updated);
+      return updated;
+    });
   };
 
   const updateTodo = (id: string, updates: Partial<Todo>) => {

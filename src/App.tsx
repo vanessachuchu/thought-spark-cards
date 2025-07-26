@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import ThoughtDetail from "./pages/ThoughtDetail";
 import TagsPage from "./pages/Tags";
 import SearchPage from "./pages/Search";
+import SettingsPage from "./pages/Settings";
 
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
@@ -34,6 +35,7 @@ const App = () => {
               <Route path="/thought/:id" element={<ThoughtDetail />} />
               <Route path="/tags" element={<TagsPage />} />
               <Route path="/search" element={<SearchPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />

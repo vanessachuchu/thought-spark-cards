@@ -27,6 +27,13 @@ export function useTodos() {
   }, [todos]);
 
   const addTodo = (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Check for duplicates based on content
+    const isDuplicate = todos.some(existingTodo => existingTodo.content.trim() === todo.content.trim());
+    if (isDuplicate) {
+      console.warn('Duplicate todo detected, skipping:', todo.content);
+      return;
+    }
+    
     const newTodo = {
       ...todo,
       id: Date.now().toString(),

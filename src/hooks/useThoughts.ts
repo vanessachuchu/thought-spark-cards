@@ -34,22 +34,7 @@ export interface ActionItem {
 const STORAGE_KEY = 'thoughts-data';
 
 // 初始示例數據
-const initialThoughts: Thought[] = [
-  {
-    id: "1",
-    content: "🖋️ 今天想到一個好點子：可以用卡片方式整理思緒！",
-    tags: ["#創意", "✨"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "2", 
-    content: "🤔 要不要開始一個專屬於自己的行動記錄？",
-    tags: ["#行動", "🔥"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+const initialThoughts: Thought[] = [];
 
 export function useThoughts() {
   const [thoughts, setThoughts] = useState<Thought[]>(() => {

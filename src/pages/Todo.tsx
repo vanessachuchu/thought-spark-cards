@@ -111,52 +111,6 @@ export default function TodoPage() {
       
       <main className="max-w-4xl mx-auto px-6 py-6 pb-20">
         
-        {/* 新增待辦區域 */}
-        <Card className="mb-6 shadow-soft border border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-lg">新增待辦事項</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">日期</label>
-                <Input
-                  type="date"
-                  value={newTodoDate}
-                  onChange={(e) => setNewTodoDate(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">時間</label>
-                <Input
-                  type="time"
-                  value={newTodoTime}
-                  onChange={(e) => setNewTodoTime(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">內容</label>
-              <Textarea
-                value={newTodoContent}
-                onChange={(e) => setNewTodoContent(e.target.value)}
-                placeholder="輸入新的待辦事項..."
-                className="mt-1"
-                onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddTodo()}
-              />
-            </div>
-            <Button
-              onClick={handleAddTodo}
-              disabled={!newTodoContent.trim()}
-              className="w-full bg-gradient-primary text-primary-foreground hover:shadow-soft transition-smooth"
-            >
-              <Plus size={16} className="mr-2" />
-              新增待辦事項
-            </Button>
-          </CardContent>
-        </Card>
 
         <div className="space-y-6">
           {todos.length === 0 ? (

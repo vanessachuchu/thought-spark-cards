@@ -84,13 +84,17 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     const selectedItems = generatedActions.filter(action => selectedActions.has(action.id));
     
     selectedItems.forEach(action => {
-      addTodo({
+      // 確保每個待辦事項都有正確的資料結構
+      const todoData = {
         content: action.content,
         done: false,
         thoughtId: thoughtId,
-        scheduledDate: action.startDate || new Date().toISOString().split('T')[0],
-        scheduledTime: action.startTime || "09:00"
-      });
+        scheduledDate: action.startDate || undefined,
+        scheduledTime: action.startTime || undefined
+      };
+      
+      console.log('Adding todo with data:', todoData);
+      addTodo(todoData);
     });
 
     // 為了兼容舊的接口，也調用原來的回調
@@ -99,11 +103,14 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
       .join('\n');
     onGenerateActionPlan(todoText);
     
-    // 跳轉到待辦清單頁面並顯示成功訊息
+    console.log(`成功加入 ${selectedItems.length} 個待辦事項到清單`);
+    
+    // 跳轉到待辦清單頁面
     setTimeout(() => {
       window.location.href = '/todo';
-    }, 500);
+    }, 100);
     
+    // 重置狀態
     setShowList(false);
     setGeneratedActions([]);
     setSelectedActions(new Set());
@@ -128,16 +135,24 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
       updateGeneratedActions(thoughtId, updatedActions);
     }
     
-    // 找到被安排的行動並自動加入待辦清單
+    // 找到被安排的行動並立即加入待辦清單
     const scheduledAction = updatedActions.find(action => action.id === actionId);
     if (scheduledAction) {
-      addTodo({
+      const todoData = {
         content: scheduledAction.content,
         done: false,
         thoughtId: thoughtId,
         scheduledDate: schedule.startDate,
         scheduledTime: schedule.startTime
-      });
+      };
+      
+      console.log('Adding scheduled todo with data:', todoData);
+      addTodo(todoData);
+      
+      // 立即跳轉到待辦頁面顯示結果
+      setTimeout(() => {
+        window.location.href = '/todo';
+      }, 100);
     }
     
     setSchedulingActionId(null);
@@ -227,7 +242,10 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
                           variant="ghost"
                           size="sm"
                           className="mt-2 text-xs"
-                          onClick={() => setSchedulingActionId(action.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSchedulingActionId(action.id);
+                          }}
                         >
                           <Calendar className="w-3 h-3 mr-1" />
                           設定時程
@@ -263,4 +281,3 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
     </div>
   );
 }
-

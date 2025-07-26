@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Brain, User } from "lucide-react";
+import { useState } from "react";
+import { Calendar as CalendarIcon, User } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +16,6 @@ import { Link } from "react-router-dom";
 import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
 
-function getToday() {
-  return new Date().toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" });
-}
-
-function getTime() {
-  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
 export default function Index() {
   const { user, loading } = useAuth();
   const { thoughts } = useThoughts();
@@ -32,13 +24,6 @@ export default function Index() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isNewThoughtDialogOpen, setIsNewThoughtDialogOpen] = useState(false);
   
-  // 統計數據計算
-  const today = new Date().toDateString();
-  
-  const todayThoughts = thoughts.filter(thought => {
-    const thoughtDate = new Date(thought.createdAt || Date.now()).toDateString();
-    return thoughtDate === today;
-  });
   
   // 獲取指定日期的思緒
   const getThoughtsForDate = (date: Date) => {
@@ -108,118 +93,46 @@ export default function Index() {
         {/* 已登入用戶的主要內容 */}
         {!loading && user && (
           <>
-        {/* 思緒日曆與今日思緒 - 提到最前面作為主要內容 */}
-        <div className="mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 左側：思緒日曆 - 占2個網格 */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                  <CalendarIcon className="w-6 h-6" />
-                  思緒日曆
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectedDate(date);
-                      setCurrentCardIndex(0); // 重置卡片索引
-                    }
-                  }}
-                  locale={zhTW}
-                  className="w-full"
-                  modifiers={{
-                    hasThoughts: getDatesWithThoughts(),
-                    hasTodos: getDatesWithTodos()
-                  }}
-                  modifiersClassNames={{
-                    hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
-                    hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
-                  }}
-                />
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
-                    <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
-                    <span>有思緒記錄</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
-                    <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
-                    <span>有待辦行程</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 右側：今日思緒 - 占1個網格 */}
+        {/* 思緒日曆 - 全寬度顯示 */}
+        <div className="mb-6">
           <Card className="shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                <Brain className="w-6 h-6" />
-                今日思緒
-                {todayThoughts.length > 0 && (
-                  <Badge variant="secondary">
-                    {todayThoughts.length} 條記錄
-                  </Badge>
-                )}
+                <CalendarIcon className="w-6 h-6" />
+                思緒日曆
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {todayThoughts.length > 0 ? (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {todayThoughts
-                    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
-                    .map((thought) => (
-                      <div 
-                        key={thought.id}
-                        className="p-3 border border-border rounded-lg bg-background/60 hover:bg-muted/30 transition-smooth cursor-pointer shadow-soft"
-                        onClick={() => window.location.href = `/thought/${thought.id}`}
-                      >
-                        <div className="text-sm text-muted-foreground mb-1">
-                          {new Date(thought.createdAt || Date.now()).toLocaleTimeString('zh-TW', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                        <p className="text-sm line-clamp-2">
-                          {thought.content}
-                        </p>
-                        {thought.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {thought.tags.map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  if (date) {
+                    setSelectedDate(date);
+                    setCurrentCardIndex(0); // 重置卡片索引
                   }
+                }}
+                locale={zhTW}
+                className="w-full"
+                modifiers={{
+                  hasThoughts: getDatesWithThoughts(),
+                  hasTodos: getDatesWithTodos()
+                }}
+                modifiersClassNames={{
+                  hasThoughts: "bg-primary/20 text-primary font-bold border border-primary/40",
+                  hasTodos: "bg-accent/20 text-accent-foreground font-bold border border-accent/40"
+                }}
+              />
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
+                  <span className="inline-block w-3 h-3 bg-primary/20 rounded border border-primary/40"></span>
+                  <span>有思緒記錄</span>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center text-center text-muted-foreground min-h-[200px]">
-                  <div>
-                    <div className="text-4xl mb-4">💭</div>
-                    <p className="text-lg mb-2">今日還沒有思緒記錄</p>
-                    <p className="text-sm">點擊右下角 ✨ 按鈕記錄新想法</p>
-                  </div>
+                <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg">
+                  <span className="inline-block w-3 h-3 bg-accent/20 rounded border border-accent/40"></span>
+                  <span>有待辦行程</span>
                 </div>
-              )}
-              
-              {todayThoughts.length > 0 && (
-                <div className="mt-4 text-right">
-                  <Link
-                    to="/search"
-                    className="text-sm text-primary hover:text-primary/80 transition-smooth"
-                  >
-                    查看全部思緒
-                  </Link>
-                </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </div>

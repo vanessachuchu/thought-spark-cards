@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ThoughtCard from "@/components/ThoughtCard";
-
+import NewThoughtDialog from "@/components/NewThoughtDialog";
 import { CarouselThoughts } from "@/components/ui/carousel-thoughts";
 import { CalendarTimeTable } from "@/components/CalendarTimeTable";
 import { useThoughts } from "@/hooks/useThoughts";
@@ -29,7 +29,7 @@ export default function Index() {
   } = useTodos();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  
+  const [isNewThoughtDialogOpen, setIsNewThoughtDialogOpen] = useState(false);
 
   // 獲取指定日期的思緒
   const getThoughtsForDate = (date: Date) => {
@@ -185,6 +185,19 @@ export default function Index() {
               </Card>
             )}
             
+            {/* 浮動新思緒按鈕 */}
+            <button 
+              onClick={() => setIsNewThoughtDialogOpen(true)} 
+              className="fab"
+            >
+              ✨
+            </button>
+
+            {/* 新思緒對話框 */}
+            <NewThoughtDialog 
+              isOpen={isNewThoughtDialogOpen} 
+              onClose={() => setIsNewThoughtDialogOpen(false)} 
+            />
           </>
         )}
       </main>

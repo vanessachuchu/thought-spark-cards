@@ -8,10 +8,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ThoughtDetail from "./pages/ThoughtDetail";
-import TodoPage from "./pages/Todo";
 import TagsPage from "./pages/Tags";
 import SearchPage from "./pages/Search";
 
+import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
@@ -28,11 +28,10 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-background pb-16">
+            <TopNav />
             <Routes>
               <Route path="/" element={<Index />} />
-              
               <Route path="/thought/:id" element={<ThoughtDetail />} />
-              <Route path="/todo" element={<TodoPage />} />
               <Route path="/tags" element={<TagsPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="*" element={<NotFound />} />

@@ -5,14 +5,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ThoughtCard from "@/components/ThoughtCard";
-import VoiceInputButton from "@/components/VoiceInputButton";
+import NewThoughtDialog from "@/components/NewThoughtDialog";
 import { CarouselThoughts } from "@/components/ui/carousel-thoughts";
 import { CalendarTimeTable } from "@/components/CalendarTimeTable";
 import { useThoughts } from "@/hooks/useThoughts";
 import { useTodos } from "@/hooks/useTodos";
-import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { Link } from "react-router-dom";
-import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
 
 function getToday() {
@@ -24,24 +23,11 @@ function getTime() {
 }
 
 export default function Index() {
-  const { thoughts, addThought } = useThoughts();
+  const { thoughts } = useThoughts();
   const { todos } = useTodos();
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState("");
-  const [now, setNow] = useState(getTime());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  
-  // 語音識別功能
-  const {
-    isRecording,
-    transcript,
-    startRecording,
-    stopRecording,
-    resetTranscript,
-    isSupported: voiceSupported,
-    error: voiceError
-  } = useVoiceRecognition();
+  const [isNewThoughtDialogOpen, setIsNewThoughtDialogOpen] = useState(false);
   
   // 統計數據計算
   const today = new Date().toDateString();
@@ -79,39 +65,6 @@ export default function Index() {
     return dates;
   };
 
-  // 自動時間刷新
-  useEffect(() => {
-    const timer = setInterval(() => setNow(getTime()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // 處理語音識別結果
-  useEffect(() => {
-    if (transcript && !isRecording) {
-      setContent(prev => prev + transcript);
-      resetTranscript();
-    }
-  }, [transcript, isRecording, resetTranscript]);
-
-  function handleAdd() {
-    if (!content.trim()) return;
-    
-    const newId = Date.now().toString();
-    const processedTags = tags
-      .split(/[,\s]+/)
-      .filter(tag => tag.trim() !== "")
-      .map(tag => tag.trim());
-    
-    const newThought = {
-      id: newId,
-      content: content.trim(),
-      tags: processedTags
-    };
-    
-    addThought(newThought);
-    setContent("");
-    setTags("");
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
@@ -119,8 +72,7 @@ export default function Index() {
       <div className="bg-gradient-primary text-primary-foreground py-8 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <div className="text-4xl mb-4">🧘‍♀️</div>
-          <h1 className="text-3xl font-light mb-2">思緒探索空間</h1>
-          <p className="text-primary-foreground/80 font-light">捕捉靈感 • 深度對話 • 化為行動</p>
+          <h1 className="text-3xl font-light mb-2">脈德小腦瓜</h1>
         </div>
       </div>
 
@@ -222,7 +174,7 @@ export default function Index() {
                   <div>
                     <div className="text-4xl mb-4">💭</div>
                     <p className="text-lg mb-2">今日還沒有思緒記錄</p>
-                    <p className="text-sm">在上方輸入框記錄新的想法吧</p>
+                    <p className="text-sm">點擊右下角 ✨ 按鈕記錄新想法</p>
                   </div>
                 </div>
               )}
@@ -241,90 +193,6 @@ export default function Index() {
           </Card>
         </div>
 
-        {/* 捕捉新思緒 */}
-        <Card className="mb-6 bg-card/80 backdrop-blur-sm shadow-elegant border border-border/50">
-          <CardHeader className="relative">
-            {/* 右上角的日期時間資訊 */}
-            <div className="absolute top-4 right-4 text-right">
-              <div className="text-sm text-muted-foreground" data-testid="today-date">
-                {getToday()}
-              </div>
-              <div className="text-xs text-muted-foreground/60">
-                {now}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
-                <span className="text-white text-xl">💭</span>
-              </div>
-              <CardTitle className="text-xl font-medium">捕捉新思緒</CardTitle>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <textarea
-                  value={content}
-                  onChange={e => setContent(e.target.value)}
-                  rows={4}
-                  placeholder="✨ 記錄你的想法..."
-                  className="w-full resize-none rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
-                />
-                {voiceError && (
-                  <div className="text-xs text-destructive mt-2 flex items-center gap-1">
-                    <span>⚠️</span>
-                    <span>{voiceError}</span>
-                  </div>
-                )}
-                <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  <span>🌿</span>
-                  <span>用心感受每一個當下</span>
-                  {voiceSupported && (
-                    <span className="ml-2">• 🎤 支援語音輸入</span>
-                  )}
-                </div>
-              </div>
-              
-              {voiceSupported && (
-                <VoiceInputButton
-                  isRecording={isRecording}
-                  onStartRecording={startRecording}
-                  onStopRecording={stopRecording}
-                  size="lg"
-                />
-              )}
-            </div>
-            
-            {isRecording && (
-              <div className="text-center py-2">
-                <div className="text-sm text-destructive animate-pulse flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-destructive rounded-full animate-ping"></div>
-                  <span>🎤 正在聆聽您的想法...</span>
-                </div>
-              </div>
-            )}
-            
-            <div>
-              <input
-                value={tags}
-                onChange={e => setTags(e.target.value)}
-                placeholder="🏷️ 標籤 (用逗號或空格分隔)"
-                className="w-full rounded-lg border border-input focus:border-ring focus:ring-2 focus:ring-ring/20 bg-background px-3 py-2.5 text-sm placeholder-muted-foreground transition-smooth"
-              />
-            </div>
-            
-            <button
-              onClick={handleAdd}
-              className="w-full bg-gradient-primary text-primary-foreground px-6 py-3 rounded-lg font-medium shadow-soft hover:shadow-elegant transition-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              disabled={!content.trim()}
-            >
-              <span>✨</span>
-              <span>記錄思緒</span>
-            </button>
-          </CardContent>
-        </Card>
 
 
         {/* 選定日期的思緒內容（當不是今日時顯示） */}
@@ -369,29 +237,34 @@ export default function Index() {
           </Card>
         )}
 
-        {/* 時間表 */}
-        <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2 font-medium">
-              <CalendarIcon className="w-6 h-6" />
-              {format(selectedDate, 'yyyy年MM月dd日', { locale: zhTW })} 行程安排
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <CalendarTimeTable selectedDate={selectedDate} />
-          </CardContent>
-        </Card>
+        {/* 時間表 - 只顯示今日的 */}
+        {isSameDay(selectedDate, new Date()) && (
+          <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2 font-medium">
+                <CalendarIcon className="w-6 h-6" />
+                今日行程安排
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <CalendarTimeTable selectedDate={selectedDate} />
+            </CardContent>
+          </Card>
+        )}
         
-        {/* 浮動新靈感按鈕 */}
+        {/* 浮動新思緒按鈕 */}
         <button
-          onClick={() => {
-            document.querySelector('textarea')?.focus();
-            document.querySelector('textarea')?.scrollIntoView({ behavior: 'smooth' });
-          }}
+          onClick={() => setIsNewThoughtDialogOpen(true)}
           className="fab"
         >
           ✨
         </button>
+
+        {/* 新思緒對話框 */}
+        <NewThoughtDialog
+          isOpen={isNewThoughtDialogOpen}
+          onClose={() => setIsNewThoughtDialogOpen(false)}
+        />
       </main>
     </div>
   );

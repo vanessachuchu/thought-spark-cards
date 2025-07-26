@@ -1,7 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, CheckSquare, Brain, MessageCircle, Plus } from "lucide-react";
-import { useTodos } from "@/hooks/useTodos";
+import { Home, Brain } from "lucide-react";
 
 const navItems = [
   { 
@@ -9,13 +8,6 @@ const navItems = [
     label: "首頁", 
     icon: Home,
     key: "home" as const
-  },
-  { 
-    to: "/todo", 
-    label: "行動", 
-    icon: CheckSquare,
-    key: "todo" as const,
-    showBadge: true
   },
   { 
     to: "/tags", 
@@ -27,18 +19,13 @@ const navItems = [
 
 export default function BottomNav() {
   const location = useLocation();
-  const { todos } = useTodos();
-  
-  // 計算未完成的待辦事項數量
-  const pendingTodosCount = todos.filter(todo => !todo.done).length;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2 z-50">
       <div className="max-w-md mx-auto">
         <div className="flex justify-around items-center">
-          {navItems.map(({ to, label, icon: Icon, key, showBadge }) => {
+          {navItems.map(({ to, label, icon: Icon, key }) => {
             const isActive = location.pathname === to;
-            const badgeCount = showBadge && key === 'todo' ? pendingTodosCount : 0;
             
             return (
               <Link
@@ -50,14 +37,7 @@ export default function BottomNav() {
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
-                <div className="relative">
-                  <Icon className="w-5 h-5 mb-1" />
-                  {badgeCount > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {badgeCount > 9 ? '9+' : badgeCount}
-                    </div>
-                  )}
-                </div>
+                <Icon className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium">{label}</span>
               </Link>
             );

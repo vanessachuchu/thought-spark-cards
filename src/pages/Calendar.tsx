@@ -132,17 +132,7 @@ export default function CalendarPage() {
                           {format(new Date(parseInt(thought.id)), "HH:mm")}
                         </div>
                         <div className="mb-3 text-stone-700 font-light">{thought.content}</div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex gap-2">
-                            {thought.tags.map(tag => (
-                              <span
-                                key={tag}
-                                className="bg-stone-100 px-2 py-0.5 rounded text-sm text-stone-600 font-light"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="flex justify-end">
                           <Link
                             to={`/thought/${thought.id}`}
                             className="text-sm underline text-stone-600 hover:text-stone-500 font-light"

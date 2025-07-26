@@ -7,57 +7,78 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TimePicker } from "@/components/ui/time-picker";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function TodoPage() {
   const { todos, addTodo, updateTodo, deleteTodo, toggleTodo } = useTodos();
   
   console.log('TodoPage render - todos:', todos);
   const [newTodoContent, setNewTodoContent] = useState("");
-  const [newTodoDate, setNewTodoDate] = useState(new Date().toISOString().split('T')[0]);
-  const [newTodoTime, setNewTodoTime] = useState("09:00");
+  const [newStartDate, setNewStartDate] = useState<Date>();
+  const [newStartTime, setNewStartTime] = useState("");
+  const [newEndDate, setNewEndDate] = useState<Date>();
+  const [newEndTime, setNewEndTime] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-  const [editDate, setEditDate] = useState("");
-  const [editTime, setEditTime] = useState("");
+  const [editStartDate, setEditStartDate] = useState<Date>();
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndDate, setEditEndDate] = useState<Date>();
+  const [editEndTime, setEditEndTime] = useState("");
 
   const handleAddTodo = () => {
     if (!newTodoContent.trim()) return;
     addTodo({
       content: newTodoContent.trim(),
       done: false,
-      scheduledDate: newTodoDate,
-      scheduledTime: newTodoTime
+      startDate: newStartDate?.toISOString().split('T')[0],
+      startTime: newStartTime,
+      endDate: newEndDate?.toISOString().split('T')[0],
+      endTime: newEndTime
     });
     setNewTodoContent("");
-    setNewTodoDate(new Date().toISOString().split('T')[0]);
-    setNewTodoTime("09:00");
+    setNewStartDate(undefined);
+    setNewStartTime("");
+    setNewEndDate(undefined);
+    setNewEndTime("");
   };
 
-  const handleStartEdit = (id: string, content: string, scheduledDate?: string, scheduledTime?: string) => {
-    setEditingId(id);
-    setEditContent(content);
-    setEditDate(scheduledDate || new Date().toISOString().split('T')[0]);
-    setEditTime(scheduledTime || "09:00");
+  const handleStartEdit = (todo: any) => {
+    setEditingId(todo.id);
+    setEditContent(todo.content);
+    setEditStartDate(todo.startDate ? new Date(todo.startDate) : undefined);
+    setEditStartTime(todo.startTime || "");
+    setEditEndDate(todo.endDate ? new Date(todo.endDate) : undefined);
+    setEditEndTime(todo.endTime || "");
   };
 
   const handleSaveEdit = () => {
     if (!editingId || !editContent.trim()) return;
     updateTodo(editingId, { 
       content: editContent.trim(),
-      scheduledDate: editDate,
-      scheduledTime: editTime
+      startDate: editStartDate?.toISOString().split('T')[0],
+      startTime: editStartTime,
+      endDate: editEndDate?.toISOString().split('T')[0],
+      endTime: editEndTime
     });
     setEditingId(null);
     setEditContent("");
-    setEditDate("");
-    setEditTime("");
+    setEditStartDate(undefined);
+    setEditStartTime("");
+    setEditEndDate(undefined);
+    setEditEndTime("");
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditContent("");
-    setEditDate("");
-    setEditTime("");
+    setEditStartDate(undefined);
+    setEditStartTime("");
+    setEditEndDate(undefined);
+    setEditEndTime("");
   };
 
   const handleDelete = (id: string) => {
@@ -67,12 +88,12 @@ export default function TodoPage() {
   };
 
   // 分類待辦事項：已排程和未排程
-  const scheduledTodos = todos.filter(todo => todo.scheduledDate && todo.scheduledTime);
-  const unscheduledTodos = todos.filter(todo => !todo.scheduledDate || !todo.scheduledTime);
+  const scheduledTodos = todos.filter(todo => todo.startDate && todo.startTime);
+  const unscheduledTodos = todos.filter(todo => !todo.startDate || !todo.startTime);
 
   // 按日期分組已排程的待辦事項
   const groupedScheduledTodos = scheduledTodos.reduce((groups, todo) => {
-    const date = todo.scheduledDate!;
+    const date = todo.startDate!;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -83,8 +104,8 @@ export default function TodoPage() {
   // 對每個日期的待辦事項按時間排序
   Object.keys(groupedScheduledTodos).forEach(date => {
     groupedScheduledTodos[date].sort((a, b) => {
-      const timeA = a.scheduledTime || "00:00";
-      const timeB = b.scheduledTime || "00:00";
+      const timeA = a.startTime || "00:00";
+      const timeB = b.startTime || "00:00";
       return timeA.localeCompare(timeB);
     });
   });
@@ -174,16 +195,33 @@ export default function TodoPage() {
                               {editingId === todo.id ? (
                                 <div className="flex-1 space-y-3">
                                   <div className="grid grid-cols-2 gap-2">
-                                    <Input
-                                      type="date"
-                                      value={editDate}
-                                      onChange={(e) => setEditDate(e.target.value)}
-                                      className="text-sm"
-                                    />
-                                    <Input
-                                      type="time"
-                                      value={editTime}
-                                      onChange={(e) => setEditTime(e.target.value)}
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          className={cn(
+                                            "justify-start text-left font-normal text-sm",
+                                            !editStartDate && "text-muted-foreground"
+                                          )}
+                                        >
+                                          <Calendar className="mr-2 h-4 w-4" />
+                                          {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0" align="start">
+                                        <CalendarComponent
+                                          mode="single"
+                                          selected={editStartDate}
+                                          onSelect={setEditStartDate}
+                                          initialFocus
+                                          className="p-3 pointer-events-auto"
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                    <TimePicker
+                                      value={editStartTime}
+                                      onChange={setEditStartTime}
+                                      placeholder="開始時間"
                                       className="text-sm"
                                     />
                                   </div>
@@ -206,10 +244,11 @@ export default function TodoPage() {
                                 <>
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
-                                      {todo.scheduledTime && (
+                                      {todo.startTime && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                                           <Clock size={12} />
-                                          {todo.scheduledTime}
+                                          {todo.startTime}
+                                          {todo.endTime && ` - ${todo.endTime}`}
                                         </div>
                                       )}
                                     </div>
@@ -222,7 +261,7 @@ export default function TodoPage() {
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => handleStartEdit(todo.id, todo.content, todo.scheduledDate, todo.scheduledTime)}
+                                      onClick={() => handleStartEdit(todo)}
                                       className="h-8 w-8 p-0"
                                     >
                                       <Edit size={16} />
@@ -293,16 +332,33 @@ export default function TodoPage() {
                           {editingId === todo.id ? (
                             <div className="flex-1 space-y-3">
                               <div className="grid grid-cols-2 gap-2">
-                                <Input
-                                  type="date"
-                                  value={editDate}
-                                  onChange={(e) => setEditDate(e.target.value)}
-                                  className="text-sm"
-                                />
-                                <Input
-                                  type="time"
-                                  value={editTime}
-                                  onChange={(e) => setEditTime(e.target.value)}
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={cn(
+                                        "justify-start text-left font-normal text-sm",
+                                        !editStartDate && "text-muted-foreground"
+                                      )}
+                                    >
+                                      <Calendar className="mr-2 h-4 w-4" />
+                                      {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <CalendarComponent
+                                      mode="single"
+                                      selected={editStartDate}
+                                      onSelect={setEditStartDate}
+                                      initialFocus
+                                      className="p-3 pointer-events-auto"
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <TimePicker
+                                  value={editStartTime}
+                                  onChange={setEditStartTime}
+                                  placeholder="開始時間"
                                   className="text-sm"
                                 />
                               </div>
@@ -333,7 +389,7 @@ export default function TodoPage() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => handleStartEdit(todo.id, todo.content, todo.scheduledDate, todo.scheduledTime)}
+                                  onClick={() => handleStartEdit(todo)}
                                   className="h-8 w-8 p-0"
                                 >
                                   <Edit size={16} />

@@ -27,8 +27,8 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
     for (let hour = 6; hour <= 23; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`;
       const todosAtThisHour = dayTodos.filter(todo => {
-        if (!todo.scheduledTime) return false;
-        const todoHour = parseInt(todo.scheduledTime.split(':')[0]);
+        if (!todo.startTime) return false;
+        const todoHour = parseInt(todo.startTime.split(':')[0]);
         return todoHour === hour;
       });
       
@@ -95,7 +95,8 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
                           
                           <div className="flex items-center gap-1 text-xs text-stone-500">
                             <Clock size={12} />
-                            {todo.scheduledTime}
+                            {todo.startTime}
+                            {todo.endTime && ` - ${todo.endTime}`}
                           </div>
                           
                           <span className={`text-sm flex-1 ${
@@ -145,8 +146,8 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
                 <label className="text-sm font-medium">時間</label>
                 <Input
                   type="time"
-                  value={editingTodo.scheduledTime || "09:00"}
-                  onChange={(e) => setEditingTodo({...editingTodo, scheduledTime: e.target.value})}
+                  value={editingTodo.startTime || "09:00"}
+                  onChange={(e) => setEditingTodo({...editingTodo, startTime: e.target.value})}
                   className="mt-1"
                 />
               </div>
@@ -162,7 +163,7 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
                 <Button 
                   onClick={() => handleUpdateTodo(editingTodo, {
                     content: editingTodo.content,
-                    scheduledTime: editingTodo.scheduledTime
+                    startTime: editingTodo.startTime
                   })} 
                   className="flex-1"
                 >

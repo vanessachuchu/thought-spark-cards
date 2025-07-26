@@ -12,7 +12,6 @@ export interface AiConversation {
 export interface Thought {
   id: string;
   content: string;
-  tags: string[];
   createdAt?: string;
   updatedAt?: string;
   aiConversation?: AiConversation;

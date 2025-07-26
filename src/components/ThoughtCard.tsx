@@ -6,32 +6,23 @@ import { useThoughts } from "@/hooks/useThoughts";
 export interface ThoughtCardProps {
   id: string;
   content: string;
-  tags: string[];
 }
 
-export default function ThoughtCard({ id, content, tags }: ThoughtCardProps) {
+export default function ThoughtCard({ id, content }: ThoughtCardProps) {
   const { updateThought, deleteThought } = useThoughts();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
-  const [editTags, setEditTags] = useState(tags.join(", "));
 
   const handleSave = () => {
     console.log("ThoughtCard handleSave called for id:", id);
-    const processedTags = editTags
-      .split(/[,\s]+/)
-      .filter(tag => tag.trim() !== "")
-      .map(tag => tag.trim());
-    
     updateThought(id, {
       content: editContent.trim(),
-      tags: processedTags
     });
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setEditContent(content);
-    setEditTags(tags.join(", "));
     setIsEditing(false);
   };
 
@@ -53,13 +44,7 @@ export default function ThoughtCard({ id, content, tags }: ThoughtCardProps) {
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
           className="w-full mb-3 p-2 border rounded resize-none"
-          rows={3}
-        />
-        <input
-          value={editTags}
-          onChange={(e) => setEditTags(e.target.value)}
-          placeholder="Tags (用逗號分隔)"
-          className="w-full mb-3 p-2 border rounded text-sm"
+          rows={4}
         />
         <div className="flex gap-2">
           <button
@@ -81,17 +66,7 @@ export default function ThoughtCard({ id, content, tags }: ThoughtCardProps) {
 
   return (
     <div className="bg-card p-5 rounded-xl shadow group hover:shadow-lg transition-shadow flex flex-col gap-2 border border-border">
-      <div className="text-base leading-relaxed text-foreground mb-2 min-h-[64px]">{content}</div>
-      <div className="flex flex-wrap gap-2 mb-1">
-        {tags.map(tag => (
-          <span
-            key={tag}
-            className="inline-flex items-center px-2 py-0.5 rounded bg-accent text-[15px] font-medium"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      <div className="text-base leading-relaxed text-foreground mb-4 min-h-[64px]">{content}</div>
       <div className="mt-auto flex justify-between items-center">
         <div className="flex gap-2">
           <button

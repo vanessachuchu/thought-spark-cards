@@ -18,8 +18,6 @@ interface NewThoughtDialogProps {
 
 export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogProps) {
   const [content, setContent] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
   const { addThought } = useThoughts();
   const { toast } = useToast();
   
@@ -52,17 +50,6 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
     }
   }, [voiceError, toast]);
 
-  const handleAddTag = () => {
-    const trimmedTag = tagInput.trim();
-    if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags(prev => [...prev, trimmedTag]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(prev => prev.filter(tag => tag !== tagToRemove));
-  };
 
   const handleSubmit = () => {
     if (!content.trim()) {
@@ -77,7 +64,6 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
     const newThought: Thought = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       content: content.trim(),
-      tags: tags,
     };
 
     addThought(newThought);
@@ -89,28 +75,16 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
 
     // 重置表單
     setContent('');
-    setTags([]);
-    setTagInput('');
     onClose();
   };
 
   const handleClose = () => {
     // 重置表單
     setContent('');
-    setTags([]);
-    setTagInput('');
     resetTranscript();
     onClose();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (tagInput.trim()) {
-        handleAddTag();
-      }
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -154,51 +128,6 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
             )}
           </div>
 
-          {/* 標籤輸入區 */}
-          <div className="space-y-3">
-            <Label htmlFor="tags" className="text-sm font-medium">
-              標籤
-            </Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-                <Input
-                  id="tags"
-                  placeholder="新增標籤"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="pl-10"
-                />
-              </div>
-              <Button 
-                type="button" 
-                onClick={handleAddTag}
-                variant="outline"
-                disabled={!tagInput.trim()}
-              >
-                新增
-              </Button>
-            </div>
-            
-            {/* 已新增的標籤 */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-destructive transition-colors"
-                    >
-                      <X size={12} />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* 操作按鈕 */}
           <div className="flex justify-end gap-3 pt-4 border-t">

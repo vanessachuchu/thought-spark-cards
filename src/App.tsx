@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ThoughtDetail from "./pages/ThoughtDetail";
-import TagsPage from "./pages/Tags";
+
 import SearchPage from "./pages/Search";
 import SettingsPage from "./pages/Settings";
 import AuthPage from "./pages/Auth";
@@ -38,7 +38,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/thought/:id" element={<ThoughtDetail />} />
-                <Route path="/tags" element={<TagsPage />} />
+                
                 <Route path="/todo" element={<TodoPage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

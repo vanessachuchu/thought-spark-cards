@@ -152,7 +152,7 @@ export default function Index() {
                       onIndexChange={setCurrentCardIndex}
                     >
                       {getThoughtsForDate(selectedDate).map(thought => (
-                        <ThoughtCard key={thought.id} {...thought} />
+                        <ThoughtCard key={thought.id} id={thought.id} content={thought.content} />
                       ))}
                     </CarouselThoughts>
                   ) : (

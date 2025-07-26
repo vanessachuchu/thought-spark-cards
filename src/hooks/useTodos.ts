@@ -8,8 +8,12 @@ export interface Todo {
   done: boolean;
   createdAt?: string;
   updatedAt?: string;
-  scheduledDate?: string; // 新增：排程日期
-  scheduledTime?: string; // 新增：排程時間 (HH:mm 格式)
+  scheduledDate?: string;
+  scheduledTime?: string;
+  startDate?: string;
+  startTime?: string;
+  endDate?: string;
+  endTime?: string;
 }
 
 const STORAGE_KEY = 'todos-data';
@@ -83,7 +87,7 @@ export function useTodos() {
 
   // 新增：根據日期獲取待辦事項
   const getTodosByDate = (date: string) => {
-    return todos.filter(todo => todo.scheduledDate === date);
+    return todos.filter(todo => todo.startDate === date || todo.scheduledDate === date);
   };
 
   return {

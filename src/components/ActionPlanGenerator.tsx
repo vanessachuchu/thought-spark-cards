@@ -93,8 +93,8 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
         content: action.content,
         done: false,
         thoughtId: thoughtId,
-        scheduledDate: action.startDate || undefined,
-        scheduledTime: action.startTime || undefined
+        startDate: action.startDate || undefined,
+        startTime: action.startTime || undefined
       };
       
       console.log('Adding todo with data:', todoData);
@@ -150,8 +150,10 @@ export function ActionPlanGenerator({ messages, thoughtContent, onGenerateAction
         content: scheduledAction.content,
         done: false,
         thoughtId: thoughtId,
-        scheduledDate: schedule.startDate,
-        scheduledTime: schedule.startTime
+        startDate: schedule.startDate,
+        startTime: schedule.startTime,
+        endDate: schedule.endDate,
+        endTime: schedule.endTime
       };
       
       console.log('Adding scheduled todo with data:', todoData);

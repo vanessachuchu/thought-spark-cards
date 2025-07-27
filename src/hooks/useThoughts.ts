@@ -38,7 +38,17 @@ const initialThoughts: Thought[] = [];
 export function useThoughts() {
   const [thoughts, setThoughts] = useState<Thought[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : initialThoughts;
+    if (stored) {
+      const parsedThoughts = JSON.parse(stored);
+      // 過濾掉任何可能的預設思緒內容
+      const filteredThoughts = parsedThoughts.filter((thought: Thought) => 
+        !thought.content.includes('🤔 要不要開始一個專屬於自己的行動記錄？') &&
+        !thought.content.includes('要不要開始') &&
+        !thought.content.includes('專屬於自己的行動記錄')
+      );
+      return filteredThoughts;
+    }
+    return initialThoughts;
   });
 
   useEffect(() => {

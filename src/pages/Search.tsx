@@ -52,7 +52,6 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
       <main className="max-w-6xl mx-auto px-6 py-10">
         <div className="text-2xl font-bold mb-6 text-primary">🔍 搜尋</div>
         

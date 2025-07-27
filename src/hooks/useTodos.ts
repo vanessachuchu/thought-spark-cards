@@ -85,9 +85,35 @@ export function useTodos() {
     updateTodo(id, { done: !todos.find(t => t.id === id)?.done });
   };
 
-  // 新增：根據日期獲取待辦事項
+  // 檢查日期是否在範圍內的輔助函數
+  const isDateInRange = (date: string, startDate?: string, endDate?: string) => {
+    if (!startDate) return false;
+    
+    const targetDate = new Date(date);
+    const start = new Date(startDate);
+    
+    // 如果沒有結束日期，只檢查開始日期
+    if (!endDate) {
+      return date === startDate;
+    }
+    
+    const end = new Date(endDate);
+    return targetDate >= start && targetDate <= end;
+  };
+
+  // 新增：根據日期獲取待辦事項（支援多日範圍和可選結束日期）
   const getTodosByDate = (date: string) => {
-    return todos.filter(todo => todo.startDate === date || todo.scheduledDate === date);
+    return todos.filter(todo => {
+      // 檢查新的日期範圍格式
+      if (todo.startDate) {
+        return isDateInRange(date, todo.startDate, todo.endDate);
+      }
+      // 向後兼容舊的 scheduledDate 格式
+      if (todo.scheduledDate) {
+        return todo.scheduledDate === date;
+      }
+      return false;
+    });
   };
 
   return {

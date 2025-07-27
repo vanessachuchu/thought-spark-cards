@@ -94,10 +94,16 @@ export function CalendarTimeTable({ selectedDate }: CalendarTimeTableProps) {
                             {todo.done ? "✓" : ""}
                           </button>
                           
-                          <div className="flex items-center gap-1 text-xs text-stone-500">
+                           <div className="flex items-center gap-1 text-xs text-stone-500">
                             <Clock size={12} />
                             {todo.startTime || todo.scheduledTime}
-                            {(todo.endTime || todo.scheduledTime !== todo.startTime) && ` - ${todo.endTime || ''}`}
+                            {todo.endTime && ` - ${todo.endTime}`}
+                            {/* 顯示多日標示 */}
+                            {todo.startDate && todo.endDate && todo.startDate !== todo.endDate && (
+                              <span className="text-xs text-accent-foreground bg-accent/20 px-1 rounded">
+                                多日
+                              </span>
+                            )}
                           </div>
                           
                           <span className={`text-sm flex-1 ${

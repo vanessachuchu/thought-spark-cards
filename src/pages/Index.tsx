@@ -44,16 +44,46 @@ export default function Index() {
     return thoughts.map(thought => new Date(thought.createdAt || Date.now()));
   };
 
-  // 獲取有待辦事項的日期
+  // 生成日期範圍的輔助函數
+  const generateDateRange = (startDate: string, endDate?: string): string[] => {
+    const dates: string[] = [];
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : start;
+    
+    const current = new Date(start);
+    while (current <= end) {
+      dates.push(format(current, 'yyyy-MM-dd'));
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return dates;
+  };
+
+  // 獲取有待辦事項的日期（支援多日範圍）
   const getDatesWithTodos = () => {
     const dates: Date[] = [];
     const dateStrings = new Set();
+    
     todos.forEach(todo => {
-      if (todo.startDate && !dateStrings.has(todo.startDate)) {
-        dateStrings.add(todo.startDate);
-        dates.push(new Date(todo.startDate));
+      let rangeDates: string[] = [];
+      
+      // 處理新的日期範圍格式
+      if (todo.startDate) {
+        rangeDates = generateDateRange(todo.startDate, todo.endDate);
       }
+      // 向後兼容舊的 scheduledDate 格式
+      else if (todo.scheduledDate) {
+        rangeDates = [todo.scheduledDate];
+      }
+      
+      rangeDates.forEach(dateStr => {
+        if (!dateStrings.has(dateStr)) {
+          dateStrings.add(dateStr);
+          dates.push(new Date(dateStr));
+        }
+      });
     });
+    
     return dates;
   };
 

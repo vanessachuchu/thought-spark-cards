@@ -170,20 +170,18 @@ export default function Index() {
               </Card>
             </div>
 
-            {/* 時間表 - 只顯示今日的 */}
-            {isSameDay(selectedDate, new Date()) && (
-              <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center gap-2 font-medium">
-                    <CalendarIcon className="w-6 h-6" />
-                    今日行程安排
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <CalendarTimeTable selectedDate={selectedDate} />
-                </CardContent>
-              </Card>
-            )}
+            {/* 時間表 - 顯示選定日期的待辦事項 */}
+            <Card className="mb-6 shadow-soft border border-border/50 bg-card/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2 font-medium">
+                  <CalendarIcon className="w-6 h-6" />
+                  {isSameDay(selectedDate, new Date()) ? '今日行程安排' : `${format(selectedDate, 'MM月dd日', { locale: zhTW })}行程安排`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <CalendarTimeTable selectedDate={selectedDate} />
+              </CardContent>
+            </Card>
             
             {/* 浮動新思緒按鈕 */}
             <button 

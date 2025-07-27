@@ -14,9 +14,10 @@ import { useToast } from '@/hooks/use-toast';
 interface NewThoughtDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onThoughtAdded?: () => void;
 }
 
-export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogProps) {
+export default function NewThoughtDialog({ isOpen, onClose, onThoughtAdded }: NewThoughtDialogProps) {
   const [content, setContent] = useState('');
   const { addThought } = useThoughts();
   const { toast } = useToast();
@@ -72,6 +73,9 @@ export default function NewThoughtDialog({ isOpen, onClose }: NewThoughtDialogPr
       title: "思緒已記錄",
       description: "您的新思緒已成功保存",
     });
+
+    // 通知父組件思緒已添加，觸發重新整理
+    onThoughtAdded?.();
 
     // 重置表單
     setContent('');

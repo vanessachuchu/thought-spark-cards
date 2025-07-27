@@ -49,9 +49,9 @@ export default function Index() {
     const dates: Date[] = [];
     const dateStrings = new Set();
     todos.forEach(todo => {
-      if (todo.scheduledDate && !dateStrings.has(todo.scheduledDate)) {
-        dateStrings.add(todo.scheduledDate);
-        dates.push(new Date(todo.scheduledDate));
+      if (todo.startDate && !dateStrings.has(todo.startDate)) {
+        dateStrings.add(todo.startDate);
+        dates.push(new Date(todo.startDate));
       }
     });
     return dates;
@@ -196,7 +196,12 @@ export default function Index() {
             {/* 新思緒對話框 */}
             <NewThoughtDialog 
               isOpen={isNewThoughtDialogOpen} 
-              onClose={() => setIsNewThoughtDialogOpen(false)} 
+              onClose={() => setIsNewThoughtDialogOpen(false)}
+              onThoughtAdded={() => {
+                // 強制重新計算今日思緒
+                setSelectedDate(new Date());
+                setCurrentCardIndex(0);
+              }}
             />
           </>
         )}

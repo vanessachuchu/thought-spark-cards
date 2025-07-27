@@ -194,37 +194,80 @@ export default function TodoPage() {
                               
                               {editingId === todo.id ? (
                                 <div className="flex-1 space-y-3">
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          className={cn(
-                                            "justify-start text-left font-normal text-sm",
-                                            !editStartDate && "text-muted-foreground"
-                                          )}
-                                        >
-                                          <Calendar className="mr-2 h-4 w-4" />
-                                          {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
-                                        </Button>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
-                                        <CalendarComponent
-                                          mode="single"
-                                          selected={editStartDate}
-                                          onSelect={setEditStartDate}
-                                          initialFocus
-                                          className="p-3 pointer-events-auto"
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <TimePicker
-                                      value={editStartTime}
-                                      onChange={setEditStartTime}
-                                      placeholder="開始時間"
-                                      className="text-sm"
-                                    />
-                                  </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">開始日期</label>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "justify-start text-left font-normal text-sm w-full",
+                                          !editStartDate && "text-muted-foreground"
+                                        )}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <CalendarComponent
+                                        mode="single"
+                                        selected={editStartDate}
+                                        onSelect={setEditStartDate}
+                                        initialFocus
+                                        className="p-3 pointer-events-auto"
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">開始時間</label>
+                                  <TimePicker
+                                    value={editStartTime}
+                                    onChange={setEditStartTime}
+                                    placeholder="開始時間"
+                                    className="text-sm w-full"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">結束日期</label>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "justify-start text-left font-normal text-sm w-full",
+                                          !editEndDate && "text-muted-foreground"
+                                        )}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {editEndDate ? format(editEndDate, "yyyy-MM-dd") : "選擇日期"}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <CalendarComponent
+                                        mode="single"
+                                        selected={editEndDate}
+                                        onSelect={setEditEndDate}
+                                        initialFocus
+                                        className="p-3 pointer-events-auto"
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">結束時間</label>
+                                  <TimePicker
+                                    value={editEndTime}
+                                    onChange={setEditEndTime}
+                                    placeholder="結束時間"
+                                    className="text-sm w-full"
+                                  />
+                                </div>
+                              </div>
                                   <Textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
@@ -332,35 +375,78 @@ export default function TodoPage() {
                           {editingId === todo.id ? (
                             <div className="flex-1 space-y-3">
                               <div className="grid grid-cols-2 gap-2">
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "justify-start text-left font-normal text-sm",
-                                        !editStartDate && "text-muted-foreground"
-                                      )}
-                                    >
-                                      <Calendar className="mr-2 h-4 w-4" />
-                                      {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <CalendarComponent
-                                      mode="single"
-                                      selected={editStartDate}
-                                      onSelect={setEditStartDate}
-                                      initialFocus
-                                      className="p-3 pointer-events-auto"
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                                <TimePicker
-                                  value={editStartTime}
-                                  onChange={setEditStartTime}
-                                  placeholder="開始時間"
-                                  className="text-sm"
-                                />
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">開始日期</label>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "justify-start text-left font-normal text-sm w-full",
+                                          !editStartDate && "text-muted-foreground"
+                                        )}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {editStartDate ? format(editStartDate, "yyyy-MM-dd") : "選擇日期"}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <CalendarComponent
+                                        mode="single"
+                                        selected={editStartDate}
+                                        onSelect={setEditStartDate}
+                                        initialFocus
+                                        className="p-3 pointer-events-auto"
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">開始時間</label>
+                                  <TimePicker
+                                    value={editStartTime}
+                                    onChange={setEditStartTime}
+                                    placeholder="開始時間"
+                                    className="text-sm w-full"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">結束日期</label>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "justify-start text-left font-normal text-sm w-full",
+                                          !editEndDate && "text-muted-foreground"
+                                        )}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {editEndDate ? format(editEndDate, "yyyy-MM-dd") : "選擇日期"}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <CalendarComponent
+                                        mode="single"
+                                        selected={editEndDate}
+                                        onSelect={setEditEndDate}
+                                        initialFocus
+                                        className="p-3 pointer-events-auto"
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs text-muted-foreground">結束時間</label>
+                                  <TimePicker
+                                    value={editEndTime}
+                                    onChange={setEditEndTime}
+                                    placeholder="結束時間"
+                                    className="text-sm w-full"
+                                  />
+                                </div>
                               </div>
                               <Textarea
                                 value={editContent}

@@ -67,10 +67,72 @@ export default function SearchPage() {
           />
         </div>
 
-        {/* 搜尋結果 */}
+{/* 搜尋結果 */}
         {searchQuery.trim() === "" ? (
-          <div className="text-center py-12 text-muted-foreground">
-            在上方輸入關鍵字開始搜尋
+          <div className="space-y-8">
+            {/* 顯示所有思緒卡片 */}
+            {thoughts.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-foreground">
+                  所有思緒卡片 ({thoughts.length})
+                </h2>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {thoughts.map(thought => (
+                    <DraggableThoughtCard key={thought.id} {...thought} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 顯示所有待辦事項 */}
+            {todos.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-foreground">
+                  所有待辦事項 ({todos.length})
+                </h2>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {todos.map(todo => (
+                    <div key={todo.id} className="bg-card p-4 rounded-xl border border-border shadow">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 mt-1 flex-shrink-0 ${
+                          todo.done
+                            ? "bg-primary border-primary"
+                            : "bg-white border-border"
+                        }`}>
+                          {todo.done && <span className="text-white text-xs leading-none">✓</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm font-medium mb-1 ${todo.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                            {todo.content}
+                          </div>
+                          {formatTimeRange(todo) && (
+                            <div className="text-xs text-muted-foreground mb-2">
+                              📅 {formatTimeRange(todo)}
+                            </div>
+                          )}
+                          {todo.thoughtId && (
+                            <Link
+                              to={`/thought/${todo.thoughtId}`}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              查看原始思緒
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 空狀態提示 */}
+            {thoughts.length === 0 && todos.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="text-lg mb-2">還沒有任何內容</div>
+                <div className="text-sm">開始記錄一些想法吧</div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-8">

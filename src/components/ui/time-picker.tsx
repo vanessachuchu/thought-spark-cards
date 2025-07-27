@@ -40,16 +40,16 @@ export function TimePicker({ value, onChange, placeholder = "選擇時間", clas
           {value || placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="flex">
-          <div className="border-r">
-            <div className="px-3 py-2 text-sm font-medium border-b">時</div>
-            <div className="max-h-48 overflow-y-auto">
+      <PopoverContent className="w-auto p-0 z-50 bg-card border border-border shadow-lg" align="start">
+        <div className="flex bg-card">
+          <div className="border-r border-border bg-card">
+            <div className="px-3 py-2 text-sm font-medium border-b border-border bg-muted/50">時</div>
+            <div className="max-h-48 overflow-y-auto bg-card">
               {hours.map((hour) => (
                 <button
                   key={hour}
                   className={cn(
-                    "w-full px-3 py-1 text-sm hover:bg-accent text-left",
+                    "w-full px-3 py-1 text-sm hover:bg-accent text-left transition-colors",
                     selectedHour === hour && "bg-primary text-primary-foreground"
                   )}
                   onClick={() => handleTimeSelect(hour, selectedMinute)}
@@ -59,14 +59,14 @@ export function TimePicker({ value, onChange, placeholder = "選擇時間", clas
               ))}
             </div>
           </div>
-          <div>
-            <div className="px-3 py-2 text-sm font-medium border-b">分</div>
-            <div className="max-h-48 overflow-y-auto">
+          <div className="bg-card">
+            <div className="px-3 py-2 text-sm font-medium border-b border-border bg-muted/50">分</div>
+            <div className="max-h-48 overflow-y-auto bg-card">
               {minutes.filter((_, i) => i % 15 === 0).map((minute) => (
                 <button
                   key={minute}
                   className={cn(
-                    "w-full px-3 py-1 text-sm hover:bg-accent text-left",
+                    "w-full px-3 py-1 text-sm hover:bg-accent text-left transition-colors",
                     selectedMinute === minute && "bg-primary text-primary-foreground"
                   )}
                   onClick={() => handleTimeSelect(selectedHour, minute)}

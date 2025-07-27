@@ -87,7 +87,7 @@ export function useTodos() {
 
   // 新增：根據日期獲取待辦事項
   const getTodosByDate = (date: string) => {
-    return todos.filter(todo => todo.startDate === date || todo.scheduledDate === date);
+    return todos.filter(todo => todo.startDate === date);
   };
 
   return {
